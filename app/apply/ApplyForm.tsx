@@ -69,7 +69,7 @@ export default function ApplyForm({ courses }: { courses: CourseOption[] }) {
       </Field>
 
       {submitError && <p role="alert" className="rounded-[var(--radius-card)] bg-danger-bg px-3 py-2 text-sm text-danger">{submitError}</p>}
-      <Button type="submit" variant="primary" loading={pending} disabled={!student}>產生申請表</Button>
+      <Button type="submit" variant="primary" loading={pending} disabled={!student || !courseA || !courseB}>產生申請表</Button>
     </form>
   );
 }

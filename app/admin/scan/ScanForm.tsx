@@ -7,10 +7,10 @@ import { scan, ScanOutcome } from './actions';
 
 type Entry = ScanOutcome & { at: string };
 
-const STYLE: Record<ScanOutcome['kind'], { box: string; title: string }> = {
-  received: { box: 'bg-success-bg text-success border-success', title: '收件成功' },
-  already: { box: 'bg-warning-bg text-warning border-warning', title: '此申請單已收件' },
-  not_found: { box: 'bg-danger-bg text-danger border-danger', title: '查無此流水號' },
+const STYLE: Record<ScanOutcome['kind'], { box: string; text: string; title: string }> = {
+  received: { box: 'bg-success-bg text-success border-success', text: 'text-success', title: '收件成功' },
+  already: { box: 'bg-warning-bg text-warning border-warning', text: 'text-warning', title: '此申請單已收件' },
+  not_found: { box: 'bg-danger-bg text-danger border-danger', text: 'text-danger', title: '查無此流水號' },
 };
 
 export default function ScanForm() {
@@ -41,7 +41,7 @@ export default function ScanForm() {
       <form onSubmit={onSubmit}>
         <label htmlFor="scan" className="mb-2 block text-sm font-medium">掃描條碼或輸入流水號後按 Enter</label>
         <input id="scan" ref={inputRef} autoFocus autoComplete="off" placeholder="A000001"
-          className="input text-center font-mono text-2xl tracking-widest" style={{ minHeight: 64 }} />
+          className="input min-h-16 text-center font-mono text-2xl tracking-widest" />
       </form>
 
       {current && (
@@ -54,7 +54,7 @@ export default function ScanForm() {
           {current.kind !== 'not_found' && (
             <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-base text-foreground">
               <dt className="text-muted-fg">學生</dt><dd>{current.studentId}　{current.studentName}</dd>
-              <dt className="text-muted-fg">課程 A</dt><dd>{current.courseACode}</dd>
+              <dt className="text-muted-fg">課程 A</dt><dd>{current.courseACode}　{current.courseAName}</dd>
               <dt className="text-muted-fg">課程 B</dt><dd>{current.courseBCode}　{current.courseBName}</dd>
               {current.kind === 'already' && (<><dt className="text-muted-fg">原收件時間</dt><dd>{formatDateTime(current.receivedAt)}</dd></>)}
             </dl>
@@ -70,7 +70,7 @@ export default function ScanForm() {
               <li key={h.at} className="flex items-center justify-between gap-3 px-4 py-2">
                 <span className="font-mono">{h.id}</span>
                 <span className="flex-1 truncate text-muted-fg">{h.kind !== 'not_found' ? `${h.studentId} ${h.studentName}` : '—'}</span>
-                <span className={STYLE[h.kind].box.split(' ')[1]}>{STYLE[h.kind].title}</span>
+                <span className={STYLE[h.kind].text}>{STYLE[h.kind].title}</span>
                 <span className="text-muted-fg">{formatDateTime(h.at).slice(11)}</span>
               </li>
             ))}

@@ -4,7 +4,7 @@ import { getDb } from '@/lib/db/client';
 import { receiveApplication } from '@/lib/applications';
 
 export type ScanOutcome =
-  | { kind: 'received' | 'already'; id: string; studentId: string; studentName: string; courseACode: string; courseBCode: string; courseBName: string; receivedAt: string }
+  | { kind: 'received' | 'already'; id: string; studentId: string; studentName: string; courseACode: string; courseAName: string; courseBCode: string; courseBName: string; receivedAt: string }
   | { kind: 'not_found'; id: string };
 
 export async function scan(id: string): Promise<ScanOutcome> {
@@ -18,6 +18,7 @@ export async function scan(id: string): Promise<ScanOutcome> {
     studentId: d.studentId,
     studentName: d.studentName,
     courseACode: d.courseACode,
+    courseAName: d.courseAName,
     courseBCode: d.courseBCode,
     courseBName: d.courseBName,
     receivedAt: d.receivedAt ?? '',
