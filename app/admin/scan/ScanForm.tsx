@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { scan, ScanOutcome } from './actions';
+import { formatDateTime } from '@/lib/format';
 
 const COLORS = { received: '#0a0', already: '#c90', not_found: '#c00' } as const;
 
@@ -29,7 +30,7 @@ export default function ScanForm() {
         <div style={{ marginTop: 16, padding: 12, border: `2px solid ${COLORS[outcome.kind]}`, color: COLORS[outcome.kind] }}>
           {outcome.kind === 'not_found' && <p>查無此流水號：{outcome.id}</p>}
           {outcome.kind === 'received' && <p>收件成功</p>}
-          {outcome.kind === 'already' && <p>已收件（{outcome.receivedAt.replace('T', ' ').slice(0, 16)}）</p>}
+          {outcome.kind === 'already' && <p>已收件（{formatDateTime(outcome.receivedAt)}）</p>}
           {outcome.kind !== 'not_found' && (
             <p>{outcome.id}　{outcome.studentId} {outcome.studentName}　{outcome.subjectCode} {outcome.subjectName}</p>
           )}

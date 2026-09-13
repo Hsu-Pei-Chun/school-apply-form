@@ -1,5 +1,6 @@
 import { getDb } from '@/lib/db/client';
 import { listSubjects } from '@/lib/subjects';
+import { formatDate } from '@/lib/format';
 import { toggleSubject } from './actions';
 import AddSubjectForm from './AddSubjectForm';
 
@@ -19,7 +20,7 @@ export default function SubjectsPage() {
               <td>{s.code}</td>
               <td>{s.name}</td>
               <td>{s.isActive ? '啟用' : '停用'}</td>
-              <td>{s.createdAt.slice(0, 10)}</td>
+              <td>{formatDate(s.createdAt)}</td>
               <td>
                 <form action={toggleSubject}>
                   <input type="hidden" name="code" value={s.code} />

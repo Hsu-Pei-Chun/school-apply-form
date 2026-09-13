@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getDb } from '@/lib/db/client';
 import { getApplication } from '@/lib/applications';
 import { renderCode128Svg } from '@/lib/barcode';
+import { formatDate } from '@/lib/format';
 import PrintButton from './PrintButton';
 import './print.css';
 
@@ -12,7 +13,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
   const a = getApplication(getDb(), id);
   if (!a) notFound();
   const svg = renderCode128Svg(a.id);
-  const date = a.createdAt.slice(0, 10);
+  const date = formatDate(a.createdAt);
 
   return (
     <main className="sheet">
