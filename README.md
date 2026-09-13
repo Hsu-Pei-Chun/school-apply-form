@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 科目申請表系統
 
-## Getting Started
+學生申請科目、列印含條碼的申請表，行政人員以掃描槍收件確認的學校內部系統。
 
-First, run the development server:
+## 需求
+
+- Node 22（建議透過 [mise](https://mise.jdx.dev/) 管理版本）
+
+## Quick start
 
 ```bash
+npm install
+npm run seed   # 產生可重複執行的假資料
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 頁面
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/apply`：學生填寫申請表
+- `/apply/[id]`：申請表明細與列印（含條碼）
+- `/admin/subjects`：科目管理（新增／停用）
+- `/admin/scan`：行政掃描收件
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 測試
 
-## Learn More
+```bash
+npm test
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 資料庫
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+改了 `lib/db/schema.ts` 後，需要重新產生 migration：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run db:generate
+```
