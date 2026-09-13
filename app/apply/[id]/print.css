@@ -1,7 +1,8 @@
 @page { size: A4; margin: 15mm; }
 
 /* 列印頁例外：不受 app/layout.tsx 的 main.container-narrow（max-width 720px）限制，見 spec §5 */
-main:has(> .print-wrap) { max-width: none; padding: 0; }
+/* 只解除 max-width，保留原有 padding（含手機寬度時的左右邊距），避免螢幕預覽模式下紙張貼齊視窗邊緣 */
+main:has(> .print-wrap) { max-width: none; }
 
 .print-wrap { max-width: 210mm; margin: 0 auto; }
 
@@ -33,7 +34,7 @@ main:has(> .print-wrap) { max-width: none; padding: 0; }
 .barcode .human { font-family: ui-monospace, monospace; font-size: 10pt; margin-top: 1mm; letter-spacing: 0.05em; }
 
 @media print {
-  .no-print, header, nav { display: none !important; }
+  .no-print, body > header, nav { display: none !important; }
   body, main { background: #fff !important; padding: 0 !important; margin: 0 !important; max-width: none !important; }
   .print-wrap { max-width: none; }
   .sheet { box-shadow: none; border: 0; padding: 0; min-height: auto; }

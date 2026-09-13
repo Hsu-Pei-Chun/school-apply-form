@@ -24,10 +24,10 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
     <div className="print-wrap">
       <PrintToolbar />
       <article className="sheet">
-        <header className="sheet-head">
+        <div className="sheet-head">
           <h1>國立○○大學　X-Class 課程修課申請表</h1>
           <p>NTHU X-Class Application Form　　115 學年度上學期</p>
-        </header>
+        </div>
 
         <section>
           <h2>一、申請人</h2>
