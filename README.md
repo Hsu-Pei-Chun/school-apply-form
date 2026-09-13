@@ -34,3 +34,14 @@ npm test
 ```bash
 npm run db:generate
 ```
+
+## 部署到 Railway
+
+1. 把 repo push 到 GitHub。
+2. Railway → New Project → Deploy from GitHub repo，選此 repo；Railway 會偵測 `Dockerfile`。
+3. Settings → Volumes → Add Volume，Mount path 填 `/app/data`（SQLite 檔案放這裡，重新部署不會遺失）。
+4. Variables 確認 `DATABASE_PATH=/app/data/app.db`（Dockerfile 已預設，可不填）。
+5. 首次啟動容器會偵測 DB 為空並自動執行 seed；之後不會再覆蓋。
+6. Settings → Networking → Generate Domain，即可拿到公開網址給他人測試。
+
+> 注意：這是單一容器 + SQLite，適合 demo。正式多人使用請換 Postgres（`lib/db/client.ts` 換 driver，schema 不用改）。
