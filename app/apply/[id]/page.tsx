@@ -23,15 +23,17 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
         <tbody>
           <tr><th>學號</th><td>{a.studentId}</td></tr>
           <tr><th>姓名</th><td>{a.studentName}</td></tr>
-          <tr><th>班級</th><td>{a.className}</td></tr>
-          <tr><th>科目代碼</th><td>{a.subjectCode}</td></tr>
-          <tr><th>科目名稱</th><td>{a.subjectName}</td></tr>
+          <tr><th>系級</th><td>{a.department}</td></tr>
+          <tr><th>一般課程 A</th><td>{a.courseACode} {a.courseAName}</td></tr>
+          <tr><th>A 修課狀態</th><td>{a.courseAStatus}</td></tr>
+          <tr><th>X-Class 課程 B</th><td>{a.courseBCode} {a.courseBName}</td></tr>
+          <tr><th>B 授課教師</th><td>{a.courseBTeacher}</td></tr>
           <tr><th>申請日期</th><td>{date}</td></tr>
         </tbody>
       </table>
       <div className="barcode">
         <div dangerouslySetInnerHTML={{ __html: svg }} />
-        <div className="human">{a.id}　{a.studentId}　{a.subjectCode}</div>
+        <div className="human">{a.id}　{a.studentId}　{a.courseBCode}</div>
       </div>
       <p className="signature">學生簽名：________________　　家長簽名：________________</p>
     </main>

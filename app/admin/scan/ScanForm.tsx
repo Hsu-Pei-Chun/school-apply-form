@@ -37,7 +37,7 @@ export default function ScanForm() {
           {outcome.kind === 'received' && <p>收件成功</p>}
           {outcome.kind === 'already' && <p>已收件（{formatDateTime(outcome.receivedAt)}）</p>}
           {outcome.kind !== 'not_found' && (
-            <p>{outcome.id}　{outcome.studentId} {outcome.studentName}　{outcome.subjectCode} {outcome.subjectName}</p>
+            <p>{outcome.id}　{outcome.studentId} {outcome.studentName}　A:{outcome.courseACode}　B:{outcome.courseBCode} {outcome.courseBName}</p>
           )}
         </div>
       )}

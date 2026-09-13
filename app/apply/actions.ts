@@ -7,15 +7,19 @@ import { createApplication } from '@/lib/applications';
 
 export async function lookupStudent(studentId: string) {
   const s = findStudent(getDb(), studentId.trim());
-  return s ? { name: s.name, className: s.className } : null;
+  return s ? { name: s.name, department: s.department } : null;
 }
 
 export async function submitApplication(formData: FormData): Promise<{ error: string } | void> {
-  const studentId = String(formData.get('studentId') ?? '').trim();
-  const subjectCode = String(formData.get('subjectCode') ?? '');
+  const input = {
+    studentId: String(formData.get('studentId') ?? '').trim(),
+    courseACode: String(formData.get('courseACode') ?? ''),
+    courseAStatus: String(formData.get('courseAStatus') ?? '').trim() || '已選上',
+    courseBCode: String(formData.get('courseBCode') ?? ''),
+  };
   let id: string;
   try {
-    id = createApplication(getDb(), { studentId, subjectCode }).id;
+    id = createApplication(getDb(), input).id;
   } catch (e) {
     return { error: (e as Error).message };
   }
