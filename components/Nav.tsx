@@ -14,14 +14,14 @@ export default function Nav() {
   return (
     <header className="bg-primary text-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3">
-        <Link href="/" className="text-lg font-semibold tracking-wide">國立○○大學 課程申請表系統</Link>
+        <Link href="/" className="min-h-11 inline-flex items-center text-lg font-semibold tracking-wide">國立○○大學 課程申請表系統</Link>
         <nav aria-label="主選單" className="flex gap-1">
           {LINKS.map(l => {
             const active = pathname.startsWith(l.href);
             return (
               <Link key={l.href} href={l.href}
                 aria-current={active ? 'page' : undefined}
-                className={`rounded-[var(--radius-card)] px-3 py-2 text-sm transition-colors duration-150 hover:bg-white/10 ${active ? 'bg-white/15 font-medium' : ''}`}>
+                className={`min-h-11 inline-flex items-center rounded-[var(--radius-card)] px-3 py-2 text-sm transition-colors duration-150 hover:bg-white/10 ${active ? 'bg-white/15 font-medium' : ''}`}>
                 {l.label}
               </Link>
             );
