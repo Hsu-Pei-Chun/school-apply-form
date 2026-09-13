@@ -27,10 +27,13 @@ COPY --from=build /app/lib ./lib
 #   （npm ci 已在本 stage 依容器平台裝好對應版本）。
 # - tsx 沒有用到 get-tsconfig/resolve-pkg-maps（那是 drizzle-kit 的 @esbuild-kit/esm-loader 依賴，非 tsx 本身需要），故不複製。
 COPY --from=deps /app/node_modules/tsx ./node_modules/tsx
-COPY --from=deps /app/node_modules/.bin/tsx ./node_modules/.bin/tsx
 COPY --from=deps /app/node_modules/esbuild ./node_modules/esbuild
 COPY --from=deps /app/node_modules/@esbuild ./node_modules/@esbuild
 COPY --from=deps /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
 RUN mkdir -p /app/data
 EXPOSE 3000
-CMD ["sh", "-c", "if [ ! -s \"$DATABASE_PATH\" ]; then node node_modules/tsx/dist/cli.mjs scripts/seed.ts; fi; node server.js"]
+# 每次啟動都跑 seed --if-empty：createDb() 內的 migrate() 會讓 DB 檔案在插入任何資料列前就變成非空，
+# 若靠檔案是否為空（[ ! -s ]）判斷是否要 seed，seed 途中若中斷會留下「已 migrate 但沒資料」的 DB，
+# 且之後永遠不會再補 seed。改由 lib/seed.ts 用 SELECT count(*) FROM students 判斷，且整個 delete+insert
+# 包在同一個 transaction 內，中斷會 rollback 回 0 筆，下次啟動仍會偵測到空表而重新 seed。
+CMD ["sh", "-c", "node node_modules/tsx/dist/cli.mjs scripts/seed.ts --if-empty && node server.js"]
