@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "0d3b686e-d76a-4363-8200-378f365104c1",
+  "id": "6542dbe3-cc7f-4fd7-87ee-dda67a6ff5a1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "applications": {
@@ -21,8 +21,22 @@
           "notNull": true,
           "autoincrement": false
         },
-        "subject_code": {
-          "name": "subject_code",
+        "course_a_code": {
+          "name": "course_a_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "course_a_status": {
+          "name": "course_a_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "course_b_code": {
+          "name": "course_b_code",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -66,12 +80,25 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "applications_subject_code_subjects_code_fk": {
-          "name": "applications_subject_code_subjects_code_fk",
+        "applications_course_a_code_courses_code_fk": {
+          "name": "applications_course_a_code_courses_code_fk",
           "tableFrom": "applications",
-          "tableTo": "subjects",
+          "tableTo": "courses",
           "columnsFrom": [
-            "subject_code"
+            "course_a_code"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "applications_course_b_code_courses_code_fk": {
+          "name": "applications_course_b_code_courses_code_fk",
+          "tableFrom": "applications",
+          "tableTo": "courses",
+          "columnsFrom": [
+            "course_b_code"
           ],
           "columnsTo": [
             "code"
@@ -89,47 +116,8 @@
         }
       }
     },
-    "students": {
-      "name": "students",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "class_name": {
-          "name": "class_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "subjects": {
-      "name": "subjects",
+    "courses": {
+      "name": "courses",
       "columns": {
         "code": {
           "name": "code",
@@ -140,6 +128,13 @@
         },
         "name": {
           "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "teacher": {
+          "name": "teacher",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -159,6 +154,45 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "students": {
+      "name": "students",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "department": {
+          "name": "department",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
         }
       },
       "indexes": {},

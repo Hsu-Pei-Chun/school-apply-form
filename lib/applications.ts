@@ -1,12 +1,22 @@
 import { eq, desc } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/sqlite-core';
 import { Db } from './db/client';
-import { applications, students, subjects, Application } from './db/schema';
+import { applications, students, courses, Application } from './db/schema';
 import { findStudent } from './students';
 
 export type ApplicationDetail = Application & {
   studentName: string;
-  className: string;
-  subjectName: string;
+  department: string;
+  courseAName: string;
+  courseBName: string;
+  courseBTeacher: string;
+};
+
+export type CreateApplicationInput = {
+  studentId: string;
+  courseACode: string;
+  courseAStatus: string;
+  courseBCode: string;
 };
 
 export function nextApplicationId(db: Db): string {
@@ -15,15 +25,23 @@ export function nextApplicationId(db: Db): string {
   return 'A' + String(n).padStart(6, '0');
 }
 
-export function createApplication(db: Db, input: { studentId: string; subjectCode: string }): Application {
+function assertActiveCourse(db: Db, code: string): void {
+  const c = db.select().from(courses).where(eq(courses.code, code)).get();
+  if (!c || c.isActive !== 1) throw new Error('課程不存在或已停用');
+}
+
+export function createApplication(db: Db, input: CreateApplicationInput): Application {
   if (!findStudent(db, input.studentId)) throw new Error('查無此學號');
-  const subject = db.select().from(subjects).where(eq(subjects.code, input.subjectCode)).get();
-  if (!subject || subject.isActive !== 1) throw new Error('科目不存在或已停用');
+  if (input.courseACode === input.courseBCode) throw new Error('一般課程與 X-Class 課程不可相同');
+  assertActiveCourse(db, input.courseACode);
+  assertActiveCourse(db, input.courseBCode);
 
   const row: Application = {
     id: nextApplicationId(db),
     studentId: input.studentId,
-    subjectCode: input.subjectCode,
+    courseACode: input.courseACode,
+    courseAStatus: input.courseAStatus,
+    courseBCode: input.courseBCode,
     status: 'printed',
     createdAt: new Date().toISOString(),
     receivedAt: null,
@@ -33,21 +51,28 @@ export function createApplication(db: Db, input: { studentId: string; subjectCod
 }
 
 export function getApplication(db: Db, id: string): ApplicationDetail | undefined {
+  const courseA = alias(courses, 'course_a');
+  const courseB = alias(courses, 'course_b');
   const row = db
     .select({
       id: applications.id,
       studentId: applications.studentId,
-      subjectCode: applications.subjectCode,
+      courseACode: applications.courseACode,
+      courseAStatus: applications.courseAStatus,
+      courseBCode: applications.courseBCode,
       status: applications.status,
       createdAt: applications.createdAt,
       receivedAt: applications.receivedAt,
       studentName: students.name,
-      className: students.className,
-      subjectName: subjects.name,
+      department: students.department,
+      courseAName: courseA.name,
+      courseBName: courseB.name,
+      courseBTeacher: courseB.teacher,
     })
     .from(applications)
     .innerJoin(students, eq(applications.studentId, students.id))
-    .innerJoin(subjects, eq(applications.subjectCode, subjects.code))
+    .innerJoin(courseA, eq(applications.courseACode, courseA.code))
+    .innerJoin(courseB, eq(applications.courseBCode, courseB.code))
     .where(eq(applications.id, id))
     .get();
   return row ?? undefined;

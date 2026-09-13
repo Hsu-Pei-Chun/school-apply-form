@@ -6,7 +6,7 @@ import { findStudent } from '@/lib/students';
 let db: Db;
 beforeEach(() => {
   db = createDb(':memory:');
-  db.insert(students).values({ id: 'S0001', name: '王小明', className: '一年一班' }).run();
+  db.insert(students).values({ id: 'S0001', name: '王小明', department: '資工系 二年級' }).run();
 });
 
 describe('findStudent', () => {

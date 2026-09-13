@@ -4,13 +4,14 @@ import { sql } from 'drizzle-orm';
 export const students = sqliteTable('students', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
-  className: text('class_name').notNull(),
+  department: text('department').notNull(),
   isActive: integer('is_active').notNull().default(1),
 });
 
-export const subjects = sqliteTable('subjects', {
+export const courses = sqliteTable('courses', {
   code: text('code').primaryKey(),
   name: text('name').notNull(),
+  teacher: text('teacher').notNull(),
   isActive: integer('is_active').notNull().default(1),
   createdAt: text('created_at').notNull(),
 });
@@ -20,7 +21,9 @@ export const applications = sqliteTable(
   {
     id: text('id').primaryKey(),
     studentId: text('student_id').notNull().references(() => students.id),
-    subjectCode: text('subject_code').notNull().references(() => subjects.code),
+    courseACode: text('course_a_code').notNull().references(() => courses.code),
+    courseAStatus: text('course_a_status').notNull(),
+    courseBCode: text('course_b_code').notNull().references(() => courses.code),
     status: text('status', { enum: ['printed', 'received'] }).notNull().default('printed'),
     createdAt: text('created_at').notNull(),
     receivedAt: text('received_at'),
@@ -29,5 +32,5 @@ export const applications = sqliteTable(
 );
 
 export type Student = typeof students.$inferSelect;
-export type Subject = typeof subjects.$inferSelect;
+export type Course = typeof courses.$inferSelect;
 export type Application = typeof applications.$inferSelect;
