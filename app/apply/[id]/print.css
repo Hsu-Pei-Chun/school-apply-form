@@ -1,11 +1,40 @@
-@page { size: A4; margin: 20mm; }
-.sheet { font-family: serif; max-width: 170mm; margin: 0 auto; background: #fff; color: #000; color-scheme: light; }
-.sheet h1 { text-align: center; }
-.sheet table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-.sheet th, .sheet td { border: 1px solid #000; padding: 8px; text-align: left; }
-.sheet th { width: 30%; }
-.barcode { text-align: center; margin: 24px 0; }
-.barcode svg { max-width: 60mm; height: auto; }
-.barcode .human { font-family: monospace; margin-top: 4px; }
-.signature { margin-top: 48px; }
-@media print { .no-print { display: none; } }
+@page { size: A4; margin: 15mm; }
+
+/* 列印頁例外：不受 app/layout.tsx 的 main.container-narrow（max-width 720px）限制，見 spec §5 */
+main:has(> .print-wrap) { max-width: none; padding: 0; }
+
+.print-wrap { max-width: 210mm; margin: 0 auto; }
+
+.sheet {
+  font-family: var(--font-serif);
+  background: #fff; color: #000; color-scheme: light;
+  width: 100%; min-height: 297mm; padding: 15mm;
+  box-shadow: 0 4px 24px rgb(15 23 42 / 0.12);
+  border: 1px solid var(--color-border);
+  font-size: 12pt; line-height: 1.6;
+}
+.sheet-head { text-align: center; margin-bottom: 8mm; }
+.sheet-head h1 { font-size: 18pt; font-weight: 700; letter-spacing: 0.05em; }
+.sheet-head p { font-size: 10pt; color: #333; }
+.sheet section { margin-bottom: 5mm; }
+.sheet h2 { font-size: 12pt; font-weight: 700; margin-bottom: 2mm; }
+.sheet table { width: 100%; border-collapse: collapse; }
+.sheet th, .sheet td { border: 1px solid #000; padding: 2mm 3mm; text-align: left; vertical-align: middle; }
+.sheet th { width: 22%; background: #f1f5f9; font-weight: 600; }
+.terms { padding-left: 6mm; font-size: 11pt; }
+.terms li { margin-bottom: 1mm; }
+.signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6mm; margin-top: 8mm; }
+.signatures span { display: block; font-size: 10pt; margin-bottom: 8mm; }
+.signatures .line { border-bottom: 1px solid #000; min-height: 8mm; padding-bottom: 1mm; }
+.sheet-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; margin-top: 10mm; }
+.note { font-size: 10pt; color: #333; max-width: 60%; }
+.barcode { text-align: center; }
+.barcode svg { width: 55mm; height: auto; }
+.barcode .human { font-family: ui-monospace, monospace; font-size: 10pt; margin-top: 1mm; letter-spacing: 0.05em; }
+
+@media print {
+  .no-print, header, nav { display: none !important; }
+  body, main { background: #fff !important; padding: 0 !important; margin: 0 !important; max-width: none !important; }
+  .print-wrap { max-width: none; }
+  .sheet { box-shadow: none; border: 0; padding: 0; min-height: auto; }
+}
