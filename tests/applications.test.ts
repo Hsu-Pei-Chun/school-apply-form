@@ -36,6 +36,9 @@ describe('createApplication', () => {
     setSubjectActive(db, 'C001', false);
     expect(() => createApplication(db, { studentId: 'S0001', subjectCode: 'C001' })).toThrow('科目不存在或已停用');
   });
+  it('科目代碼不存在拋錯', () => {
+    expect(() => createApplication(db, { studentId: 'S0001', subjectCode: 'C999' })).toThrow('科目不存在或已停用');
+  });
 });
 
 describe('getApplication', () => {
