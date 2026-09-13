@@ -14,10 +14,15 @@ export default function ScanForm() {
     e.preventDefault();
     const value = inputRef.current?.value ?? '';
     if (!value.trim()) return;
-    setOutcome(await scan(value));
     if (inputRef.current) {
       inputRef.current.value = '';
-      inputRef.current.focus();
+    }
+    try {
+      setOutcome(await scan(value));
+    } catch {
+      setOutcome({ kind: 'not_found', id: value });
+    } finally {
+      inputRef.current?.focus();
     }
   }
 
