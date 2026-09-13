@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Nav from "@/components/Nav";
 
 export const metadata: Metadata = {
   title: "課程申請表系統",
@@ -14,7 +15,8 @@ export default function RootLayout({
   return (
     <html lang="zh-Hant">
       <body>
-        {children}
+        <Nav />
+        <main className="container-narrow">{children}</main>
       </body>
     </html>
   );
