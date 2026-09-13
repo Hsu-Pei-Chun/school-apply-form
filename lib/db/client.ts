@@ -18,10 +18,10 @@ export function createDb(filePath: string): Db {
   return db;
 }
 
-let singleton: Db | undefined;
+const g = globalThis as { __schoolApplyDb?: Db };
 export function getDb(): Db {
-  if (!singleton) {
-    singleton = createDb(process.env.DATABASE_PATH ?? 'data/app.db');
+  if (!g.__schoolApplyDb) {
+    g.__schoolApplyDb = createDb(process.env.DATABASE_PATH ?? 'data/app.db');
   }
-  return singleton;
+  return g.__schoolApplyDb;
 }
