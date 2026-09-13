@@ -1,45 +1,81 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { scan, ScanOutcome } from './actions';
+import { CheckIcon, XIcon } from '@/components/icons';
 import { formatDateTime } from '@/lib/format';
+import { scan, ScanOutcome } from './actions';
 
-const COLORS = { received: '#0a0', already: '#c90', not_found: '#c00' } as const;
+type Entry = ScanOutcome & { at: string };
+
+const STYLE: Record<ScanOutcome['kind'], { box: string; title: string }> = {
+  received: { box: 'bg-success-bg text-success border-success', title: '收件成功' },
+  already: { box: 'bg-warning-bg text-warning border-warning', title: '此申請單已收件' },
+  not_found: { box: 'bg-danger-bg text-danger border-danger', title: '查無此流水號' },
+};
 
 export default function ScanForm() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [outcome, setOutcome] = useState<ScanOutcome | null>(null);
+  const [current, setCurrent] = useState<Entry | null>(null);
+  const [history, setHistory] = useState<Entry[]>([]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const value = inputRef.current?.value ?? '';
-    if (!value.trim()) return;
-    if (inputRef.current) {
-      inputRef.current.value = '';
-    }
+    const el = inputRef.current;
+    const value = el?.value.trim() ?? '';
+    if (!value || !el) return;
+    el.value = '';
+    let outcome: ScanOutcome;
     try {
-      setOutcome(await scan(value));
+      outcome = await scan(value);
     } catch {
-      setOutcome({ kind: 'not_found', id: value });
-    } finally {
-      inputRef.current?.focus();
+      outcome = { kind: 'not_found', id: value };
     }
+    const entry: Entry = { ...outcome, at: new Date().toISOString() };
+    setCurrent(entry);
+    setHistory(h => [entry, ...h].slice(0, 5));
+    el.focus();
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-6">
       <form onSubmit={onSubmit}>
-        <input ref={inputRef} autoFocus placeholder="掃描條碼或輸入流水號後 Enter" style={{ fontSize: 20, width: 320 }} />
+        <label htmlFor="scan" className="mb-2 block text-sm font-medium">掃描條碼或輸入流水號後按 Enter</label>
+        <input id="scan" ref={inputRef} autoFocus autoComplete="off" placeholder="A000001"
+          className="input text-center font-mono text-2xl tracking-widest" style={{ minHeight: 64 }} />
       </form>
-      {outcome && (
-        <div style={{ marginTop: 16, padding: 12, border: `2px solid ${COLORS[outcome.kind]}`, color: COLORS[outcome.kind] }}>
-          {outcome.kind === 'not_found' && <p>查無此流水號：{outcome.id}</p>}
-          {outcome.kind === 'received' && <p>收件成功</p>}
-          {outcome.kind === 'already' && <p>已收件（{formatDateTime(outcome.receivedAt)}）</p>}
-          {outcome.kind !== 'not_found' && (
-            <p>{outcome.id}　{outcome.studentId} {outcome.studentName}　A:{outcome.courseACode}　B:{outcome.courseBCode} {outcome.courseBName}</p>
+
+      {current && (
+        <div key={current.at} role="status" className={`animate-[fade-in_200ms_ease-out] rounded-[var(--radius-card)] border-2 p-6 ${STYLE[current.kind].box}`}>
+          <div className="flex items-center gap-2 text-2xl font-semibold">
+            {current.kind === 'received' ? <CheckIcon className="size-7" /> : <XIcon className="size-7" />}
+            {STYLE[current.kind].title}
+          </div>
+          <p className="mt-2 font-mono text-lg">{current.id}</p>
+          {current.kind !== 'not_found' && (
+            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-base text-foreground">
+              <dt className="text-muted-fg">學生</dt><dd>{current.studentId}　{current.studentName}</dd>
+              <dt className="text-muted-fg">課程 A</dt><dd>{current.courseACode}</dd>
+              <dt className="text-muted-fg">課程 B</dt><dd>{current.courseBCode}　{current.courseBName}</dd>
+              {current.kind === 'already' && (<><dt className="text-muted-fg">原收件時間</dt><dd>{formatDateTime(current.receivedAt)}</dd></>)}
+            </dl>
           )}
         </div>
+      )}
+
+      {history.length > 0 && (
+        <section>
+          <h2 className="mb-2 text-sm font-medium text-muted-fg">最近掃描</h2>
+          <ul className="divide-y divide-border rounded-[var(--radius-card)] border border-border bg-surface text-sm">
+            {history.map(h => (
+              <li key={h.at} className="flex items-center justify-between gap-3 px-4 py-2">
+                <span className="font-mono">{h.id}</span>
+                <span className="flex-1 truncate text-muted-fg">{h.kind !== 'not_found' ? `${h.studentId} ${h.studentName}` : '—'}</span>
+                <span className={STYLE[h.kind].box.split(' ')[1]}>{STYLE[h.kind].title}</span>
+                <span className="text-muted-fg">{formatDateTime(h.at).slice(11)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

@@ -1,22 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import Button from '@/components/Button';
+import Field from '@/components/Field';
 import { addCourse } from './actions';
 
 export default function AddCourseForm() {
   const [error, setError] = useState('');
-  async function onSubmit(formData: FormData) {
+  const [pending, startTransition] = useTransition();
+
+  function onSubmit(formData: FormData) {
     setError('');
-    const r = await addCourse(formData);
-    if (r?.error) setError(r.error);
+    startTransition(async () => {
+      const r = await addCourse(formData);
+      if (r?.error) setError(r.error);
+    });
   }
+
   return (
-    <form action={onSubmit} style={{ display: 'flex', gap: 8, alignItems: 'end' }}>
-      <label htmlFor="code">代碼<br /><input id="code" name="code" required /></label>
-      <label htmlFor="name">名稱<br /><input id="name" name="name" required /></label>
-      <label htmlFor="teacher">授課教師<br /><input id="teacher" name="teacher" required /></label>
-      <button type="submit">新增</button>
-      {error && <span role="alert" style={{ color: 'red' }}>{error}</span>}
+    <form action={onSubmit} className="grid gap-4 sm:grid-cols-[1fr_2fr_1fr_auto] sm:items-end">
+      <Field id="code" label="課程代碼"><input id="code" name="code" className="input" required /></Field>
+      <Field id="name" label="課程名稱"><input id="name" name="name" className="input" required /></Field>
+      <Field id="teacher" label="授課教師"><input id="teacher" name="teacher" className="input" required /></Field>
+      <Button type="submit" variant="primary" loading={pending}>新增</Button>
+      {error && <p role="alert" className="text-sm text-danger sm:col-span-4">{error}</p>}
     </form>
   );
 }
