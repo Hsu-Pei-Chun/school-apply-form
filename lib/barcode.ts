@@ -7,5 +7,6 @@ export function renderCode128Svg(text: string): string {
     scale: 3,
     height: 15,
     includetext: false,
+    paddingwidth: 10,
   });
 }

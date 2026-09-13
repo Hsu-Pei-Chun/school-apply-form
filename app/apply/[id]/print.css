@@ -22,7 +22,7 @@ main:has(> .print-wrap) { max-width: none; }
 .sheet table { width: 100%; border-collapse: collapse; }
 .sheet th, .sheet td { border: 1px solid #000; padding: 2mm 3mm; text-align: left; vertical-align: middle; }
 .sheet th { width: 22%; background: #f1f5f9; font-weight: 600; }
-.terms { padding-left: 6mm; font-size: 11pt; }
+.terms { padding-left: 6mm; font-size: 11pt; list-style: decimal; }
 .terms li { margin-bottom: 1mm; }
 .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6mm; margin-top: 8mm; }
 .signatures span { display: block; font-size: 10pt; margin-bottom: 8mm; }
