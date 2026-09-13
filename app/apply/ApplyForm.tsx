@@ -11,6 +11,7 @@ export default function ApplyForm({ courses }: Props) {
   const [student, setStudent] = useState<{ name: string; department: string } | null>(null);
   const [lookupError, setLookupError] = useState('');
   const [courseA, setCourseA] = useState('');
+  const [courseB, setCourseB] = useState('');
   const [submitError, setSubmitError] = useState('');
 
   async function onBlur() {
@@ -34,7 +35,11 @@ export default function ApplyForm({ courses }: Props) {
       {lookupError && <p role="alert" style={{ color: 'red' }}>{lookupError}</p>}
 
       <label htmlFor="courseACode">一般課程 A</label>
-      <select id="courseACode" name="courseACode" required value={courseA} onChange={e => setCourseA(e.target.value)}>
+      <select id="courseACode" name="courseACode" required value={courseA} onChange={e => {
+        const a = e.target.value;
+        setCourseA(a);
+        if (courseB === a) setCourseB('');
+      }}>
         <option value="" disabled>請選擇</option>
         {courses.map(c => <option key={c.code} value={c.code}>{c.code} {c.name}</option>)}
       </select>
@@ -43,7 +48,7 @@ export default function ApplyForm({ courses }: Props) {
       <input id="courseAStatus" name="courseAStatus" defaultValue="已選上" />
 
       <label htmlFor="courseBCode">X-Class 課程 B</label>
-      <select id="courseBCode" name="courseBCode" required defaultValue="">
+      <select id="courseBCode" name="courseBCode" required value={courseB} onChange={e => setCourseB(e.target.value)}>
         <option value="" disabled>請選擇</option>
         {courses.filter(c => c.code !== courseA).map(c => (
           <option key={c.code} value={c.code}>{c.code} {c.name}（{c.teacher}）</option>

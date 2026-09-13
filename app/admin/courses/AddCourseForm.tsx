@@ -16,7 +16,7 @@ export default function AddCourseForm() {
       <label htmlFor="name">名稱<br /><input id="name" name="name" required /></label>
       <label htmlFor="teacher">授課教師<br /><input id="teacher" name="teacher" required /></label>
       <button type="submit">新增</button>
-      {error && <span style={{ color: 'red' }}>{error}</span>}
+      {error && <span role="alert" style={{ color: 'red' }}>{error}</span>}
     </form>
   );
 }
