@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDb, Db } from '@/lib/db/client';
 import { students } from '@/lib/db/schema';
-import { CookieStore, SESSION_COOKIE, resolveStudent, setSession, clearSession } from '@/lib/auth-core';
+import { CookieStore, SESSION_COOKIE, resolveStudent, setSession, clearSession, safeNext } from '@/lib/auth-core';
 
 function memStore(): CookieStore & { jar: Map<string, string> } {
   const jar = new Map<string, string>();
@@ -36,5 +36,22 @@ describe('auth-core', () => {
     setSession(store, '113000001');
     clearSession(store);
     expect(store.jar.has(SESSION_COOKIE)).toBe(false);
+  });
+});
+
+describe('safeNext', () => {
+  it('合法站內路徑原樣放行', () => {
+    expect(safeNext('/apply')).toBe('/apply');
+    expect(safeNext('/apply?x=1')).toBe('/apply?x=1');
+    expect(safeNext('/apply/A000001')).toBe('/apply/A000001');
+  });
+  it('protocol-relative、反斜線混淆、外部網址、空值皆回退 /apply', () => {
+    expect(safeNext('//evil.com')).toBe('/apply');
+    expect(safeNext('/\\evil.com')).toBe('/apply');
+    expect(safeNext('/x\\y')).toBe('/apply');
+    expect(safeNext('https://evil.com')).toBe('/apply');
+    expect(safeNext('')).toBe('/apply');
+    expect(safeNext(undefined)).toBe('/apply');
+    expect(safeNext(42)).toBe('/apply');
   });
 });

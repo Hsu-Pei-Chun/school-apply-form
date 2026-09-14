@@ -2,11 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { login, logout } from '@/lib/auth';
-
-function safeNext(v: unknown): string {
-  const s = typeof v === 'string' ? v : '';
-  return s.startsWith('/') && !s.startsWith('//') ? s : '/apply';
-}
+import { safeNext } from '@/lib/auth-core';
 
 export async function loginAction(formData: FormData): Promise<{ error: string } | void> {
   const studentId = String(formData.get('studentId') ?? '').trim();

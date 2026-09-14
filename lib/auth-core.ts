@@ -24,3 +24,14 @@ export function setSession(store: CookieStore, studentId: string): void {
 export function clearSession(store: CookieStore): void {
   store.delete(SESSION_COOKIE);
 }
+
+/**
+ * 站內導頁白名單：只允許以單一 `/` 開頭、不含任何反斜線的路徑，
+ * 避免 `//evil.com`（protocol-relative）或 `/\evil.com`（瀏覽器會把 `\` 正規化成 `/`）造成開放式轉址。
+ */
+export function safeNext(v: unknown): string {
+  if (typeof v !== 'string') return '/apply';
+  if (v.includes('\\')) return '/apply';
+  if (!/^\/[^/\\]/.test(v)) return '/apply';
+  return v;
+}

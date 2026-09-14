@@ -1,13 +1,14 @@
 import { redirect } from 'next/navigation';
 import Card from '@/components/Card';
 import { getCurrentStudent } from '@/lib/auth';
+import { safeNext } from '@/lib/auth-core';
 import LoginForm from './LoginForm';
 
 export const dynamic = 'force-dynamic';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next = '/apply' } = await searchParams;
-  if (await getCurrentStudent()) redirect(next.startsWith('/') ? next : '/apply');
+  if (await getCurrentStudent()) redirect(safeNext(next));
   return (
     <>
       <h1 className="mb-1 text-2xl font-semibold">學生登入</h1>
