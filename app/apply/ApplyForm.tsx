@@ -1,64 +1,50 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import Button from '@/components/Button';
 import Field from '@/components/Field';
-import { CheckIcon } from '@/components/icons';
-import { lookupStudent, submitApplication } from './actions';
+import CourseARows, { CourseARow } from './CourseARows';
+import { submitApplication } from './actions';
 
 type CourseOption = { code: string; name: string; teacher: string };
 
-export default function ApplyForm({ courses }: { courses: CourseOption[] }) {
-  const [studentId, setStudentId] = useState('');
-  const [student, setStudent] = useState<{ name: string; department: string } | null>(null);
-  const [lookupError, setLookupError] = useState('');
-  const [courseA, setCourseA] = useState('');
+export default function ApplyForm({ courses, maxCoursesA }: { courses: CourseOption[]; maxCoursesA: number }) {
+  const [rows, setRows] = useState<CourseARow[]>([{ key: 1, code: '', name: '', time: '', teacher: '' }]);
   const [courseB, setCourseB] = useState('');
-  const [submitError, setSubmitError] = useState('');
+  const [error, setError] = useState<{ message: string; existingId?: string } | null>(null);
   const [pending, startTransition] = useTransition();
 
-  async function onBlur() {
-    if (!studentId.trim()) return;
-    const s = await lookupStudent(studentId);
-    setStudent(s);
-    setLookupError(s ? '' : '查無此學號');
-  }
+  const rowsComplete = rows.every(r => r.code.trim() && r.name.trim() && r.time.trim() && r.teacher.trim());
 
   function onSubmit(formData: FormData) {
-    setSubmitError('');
+    setError(null);
     startTransition(async () => {
       const r = await submitApplication(formData);
-      if (r?.error) setSubmitError(r.error);
+      if (r?.error) setError({ message: r.error, existingId: r.existingId });
     });
   }
 
   return (
-    <form action={onSubmit} className="flex flex-col gap-5">
-      <Field id="studentId" label="學號" hint="例：S0001，輸入後離開欄位會自動帶出姓名" error={lookupError}>
-        <input id="studentId" name="studentId" className="input" value={studentId}
-          onChange={e => { setStudentId(e.target.value); setStudent(null); }} onBlur={onBlur} required autoComplete="off" />
-      </Field>
-      {student && (
-        <p className="-mt-3 flex items-center gap-1.5 text-sm text-success">
-          <CheckIcon className="size-4" /> {student.department}　{student.name}
-        </p>
-      )}
-
-      <Field id="courseACode" label="一般課程 A" hint="你目前已選的正規課程">
-        <input id="courseACode" name="courseACode" className="input" required value={courseA} onChange={e => setCourseA(e.target.value)} />
-      </Field>
+    <form action={onSubmit} className="flex flex-col gap-6">
+      <CourseARows rows={rows} max={maxCoursesA} onChange={setRows} />
 
       <Field id="courseBCode" label="X-Class 課程 B" hint="欲申請的 X-Class 課程，需事先與授課教師確認">
         <select id="courseBCode" name="courseBCode" className="input" required value={courseB} onChange={e => setCourseB(e.target.value)}>
           <option value="" disabled>請選擇</option>
-          {courses.filter(c => c.code !== courseA).map(c => (
-            <option key={c.code} value={c.code}>{c.code}　{c.name}（{c.teacher}）</option>
-          ))}
+          {courses.map(c => <option key={c.code} value={c.code}>{c.code}　{c.name}（{c.teacher}）</option>)}
         </select>
       </Field>
 
-      {submitError && <p role="alert" className="rounded-[var(--radius-card)] bg-danger-bg px-3 py-2 text-sm text-danger">{submitError}</p>}
-      <Button type="submit" variant="primary" loading={pending} disabled={!student || !courseA || !courseB}>產生申請表</Button>
+      {error && (
+        <p role="alert" className="rounded-[var(--radius-card)] bg-danger-bg px-3 py-2 text-sm text-danger">
+          {error.message}
+          {error.existingId && (
+            <>　<Link href={`/apply/${error.existingId}`} className="underline">查看／重新列印原申請表</Link></>
+          )}
+        </p>
+      )}
+      <Button type="submit" variant="primary" loading={pending} disabled={!rowsComplete || !courseB}>產生申請表</Button>
     </form>
   );
 }
