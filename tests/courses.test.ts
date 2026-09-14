@@ -27,6 +27,14 @@ describe('courses', () => {
   });
 
   it('科號非 15 碼拋錯', () => {
-    expect(() => createCourse(db, { code: 'C001', name: 'x', teacher: 'y' })).toThrow('科號必須為 15 碼');
+    expect(() => createCourse(db, { code: 'C001', name: 'x', teacher: 'y' })).toThrow('科號必須為 15 碼英數');
+  });
+
+  it('科號含空格（雖 15 碼）拋錯', () => {
+    expect(() => createCourse(db, { code: '11510 EECS 2001', name: 'x', teacher: 'y' })).toThrow('科號必須為 15 碼英數');
+  });
+
+  it('科號含中文（雖 15 碼）拋錯', () => {
+    expect(() => createCourse(db, { code: '中文課號測試中文課號測試中文課', name: 'x', teacher: 'y' })).toThrow('科號必須為 15 碼英數');
   });
 });
