@@ -14,24 +14,34 @@ main:has(> .print-wrap) { max-width: none; }
   border: 1px solid var(--color-border);
   font-size: 12pt; line-height: 1.6;
 }
-.sheet-head { text-align: center; margin-bottom: 8mm; }
-.sheet-head h1 { font-size: 18pt; font-weight: 700; letter-spacing: 0.05em; }
-.sheet-head p { font-size: 10pt; color: #333; }
+.sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 6mm; margin-bottom: 6mm; }
+.sheet-title { flex: 1; }
+.sheet-title h1 { font-size: 18pt; font-weight: 700; letter-spacing: 0.05em; }
+.sheet-title p { font-size: 10pt; color: #333; }
+.barcode { flex: 0 0 auto; text-align: center; padding: 5mm; border: 1px solid #000; }
+.barcode svg { width: 60mm; height: auto; display: block; }
+.barcode .human { font-family: ui-monospace, monospace; font-size: 9pt; margin-top: 1mm; letter-spacing: 0.08em; }
 .sheet section { margin-bottom: 5mm; }
 .sheet h2 { font-size: 12pt; font-weight: 700; margin-bottom: 2mm; }
 .sheet table { width: 100%; border-collapse: collapse; }
 .sheet th, .sheet td { border: 1px solid #000; padding: 2mm 3mm; text-align: left; vertical-align: middle; }
 .sheet th { width: 22%; background: #f1f5f9; font-weight: 600; }
+.courses-a th { width: auto; }
+.courses-a th:first-child, .courses-a td:first-child { width: 8mm; text-align: center; }
 .terms { padding-left: 6mm; font-size: 11pt; list-style: decimal; }
 .terms li { margin-bottom: 1mm; }
 .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6mm; margin-top: 8mm; }
 .signatures span { display: block; font-size: 10pt; margin-bottom: 8mm; }
 .signatures .line { border-bottom: 1px solid #000; min-height: 8mm; padding-bottom: 1mm; }
 .sheet-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; margin-top: 10mm; }
-.note { font-size: 10pt; color: #333; max-width: 60%; }
-.barcode { text-align: center; }
-.barcode svg { width: 55mm; height: auto; }
-.barcode .human { font-family: ui-monospace, monospace; font-size: 10pt; margin-top: 1mm; letter-spacing: 0.05em; }
+.note { font-size: 10pt; color: #333; max-width: 70%; }
+.serial { font-family: ui-monospace, monospace; font-size: 9pt; color: #333; }
+
+@media (max-width: 640px) {
+  .sheet-head { flex-direction: column; }
+  .barcode { align-self: flex-end; max-width: 100%; box-sizing: border-box; }
+  .sheet { padding: 8mm; }
+}
 
 @media print {
   .no-print, body > header, nav { display: none !important; }

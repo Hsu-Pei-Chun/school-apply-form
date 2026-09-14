@@ -8,6 +8,6 @@ describe('renderCode128Svg', () => {
     expect(svg).toContain('</svg>');
   });
   it('不同內容產生不同 svg', () => {
-    expect(renderCode128Svg('A000001')).not.toBe(renderCode128Svg('A000002'));
+    expect(renderCode128Svg('11300000111510EECS200101')).not.toBe(renderCode128Svg('11300000211510EECS200101'));
   });
 });

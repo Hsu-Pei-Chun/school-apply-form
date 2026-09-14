@@ -18,15 +18,21 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const a = getApplication(getDb(), id);
   if (!a) notFound();
-  const svg = renderCode128Svg(a.id);
+  const svg = renderCode128Svg(a.barcode);
 
   return (
     <div className="print-wrap">
       <PrintToolbar />
       <article className="sheet">
         <div className="sheet-head">
-          <h1>國立○○大學　X-Class 課程修課申請表</h1>
-          <p>NTHU X-Class Application Form　　115 學年度上學期</p>
+          <div className="sheet-title">
+            <h1>國立○○大學　X-Class 課程修課申請表</h1>
+            <p>NTHU X-Class Application Form　　115 學年度上學期</p>
+          </div>
+          <div className="barcode" role="img" aria-label={`條碼 ${a.barcode}`}>
+            <div dangerouslySetInnerHTML={{ __html: svg }} />
+            <div className="human">{a.barcode}</div>
+          </div>
         </div>
 
         <section>
@@ -41,10 +47,14 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
 
         <section>
           <h2>二、一般課程（Course A）</h2>
-          <table>
+          <table className="courses-a">
+            <thead>
+              <tr><th>#</th><th>科號（課號）</th><th>課名</th><th>上課時間</th><th>任課教師</th></tr>
+            </thead>
             <tbody>
-              <tr><th>課程代碼</th><td>{a.courseACode}</td><th>修課狀態</th><td>{a.courseAStatus}</td></tr>
-              <tr><th>課程名稱</th><td colSpan={3}>{a.courseAName}</td></tr>
+              {a.coursesA.map(c => (
+                <tr key={c.seq}><td>{c.seq}</td><td>{c.code}</td><td>{c.name}</td><td>{c.time}</td><td>{c.teacher}</td></tr>
+              ))}
             </tbody>
           </table>
         </section>
@@ -53,7 +63,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
           <h2>三、X-Class 課程（Course B）</h2>
           <table>
             <tbody>
-              <tr><th>課程代碼</th><td>{a.courseBCode}</td><th>授課教師</th><td>{a.courseBTeacher}</td></tr>
+              <tr><th>科號</th><td>{a.courseBCode}</td><th>授課教師</th><td>{a.courseBTeacher}</td></tr>
               <tr><th>課程名稱</th><td colSpan={3}>{a.courseBName}</td></tr>
             </tbody>
           </table>
@@ -72,10 +82,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
 
         <footer className="sheet-foot">
           <p className="note">請於開學第二週週五前，將本表送交校本部第一綜合大樓一樓課務組。</p>
-          <div className="barcode">
-            <div dangerouslySetInnerHTML={{ __html: svg }} />
-            <div className="human">{a.id}　{a.studentId}　{a.courseBCode}</div>
-          </div>
+          <p className="serial">申請單號 {a.id}</p>
         </footer>
       </article>
     </div>

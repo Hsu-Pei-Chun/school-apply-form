@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { logoutAction } from '@/app/login/actions';
 
 const LINKS = [
   { href: '/apply', label: '學生申請' },
@@ -9,23 +10,32 @@ const LINKS = [
   { href: '/admin/scan', label: '掃描收件' },
 ];
 
-export default function Nav() {
+export type NavUser = { id: string; name: string } | null;
+
+export default function Nav({ user }: { user: NavUser }) {
   const pathname = usePathname();
   return (
     <header className="bg-primary text-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3">
         <Link href="/" className="min-h-11 inline-flex items-center text-lg font-semibold tracking-wide">國立○○大學 課程申請表系統</Link>
-        <nav aria-label="主選單" className="flex gap-1">
+        <nav aria-label="主選單" className="flex flex-wrap items-center gap-1">
           {LINKS.map(l => {
             const active = pathname.startsWith(l.href);
             return (
-              <Link key={l.href} href={l.href}
-                aria-current={active ? 'page' : undefined}
+              <Link key={l.href} href={l.href} aria-current={active ? 'page' : undefined}
                 className={`min-h-11 inline-flex items-center rounded-[var(--radius-card)] px-3 py-2 text-sm transition-colors duration-150 hover:bg-white/10 ${active ? 'bg-white/15 font-medium' : ''}`}>
                 {l.label}
               </Link>
             );
           })}
+          {user ? (
+            <form action={logoutAction} className="ml-2 flex items-center gap-2 border-l border-white/30 pl-3 text-sm">
+              <span className="font-mono">{user.id}</span><span>{user.name}</span>
+              <button type="submit" className="min-h-11 cursor-pointer rounded-[var(--radius-card)] px-2 underline-offset-2 hover:underline">登出</button>
+            </form>
+          ) : (
+            <Link href="/login" className="ml-2 min-h-11 inline-flex items-center border-l border-white/30 pl-3 text-sm hover:underline">登入</Link>
+          )}
         </nav>
       </div>
     </header>
