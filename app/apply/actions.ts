@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/db/client';
-import { getCurrentStudent } from '@/lib/auth';
+import { getCurrentStudent, logout } from '@/lib/auth';
 import { createApplication, DuplicateApplicationError, MAX_COURSES_A, CourseAInput } from '@/lib/applications';
 
 function parseCoursesA(formData: FormData): CourseAInput[] {
@@ -20,7 +20,10 @@ function parseCoursesA(formData: FormData): CourseAInput[] {
 
 export async function submitApplication(formData: FormData): Promise<{ error: string; existingId?: string } | void> {
   const student = await getCurrentStudent();
-  if (!student) redirect('/login?next=/apply');
+  if (!student) {
+    await logout();
+    redirect('/login?next=/apply');
+  }
 
   let id: string;
   try {
