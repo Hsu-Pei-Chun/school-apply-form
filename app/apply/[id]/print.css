@@ -18,7 +18,7 @@ main:has(> .print-wrap) { max-width: none; }
 .sheet-title { flex: 1; }
 .sheet-title h1 { font-size: 18pt; font-weight: 700; letter-spacing: 0.05em; }
 .sheet-title p { font-size: 10pt; color: #333; }
-.barcode { flex: 0 0 auto; text-align: center; padding: 3mm; border: 1px solid #000; }
+.barcode { flex: 0 0 auto; text-align: center; padding: 5mm; border: 1px solid #000; }
 .barcode svg { width: 60mm; height: auto; display: block; }
 .barcode .human { font-family: ui-monospace, monospace; font-size: 9pt; margin-top: 1mm; letter-spacing: 0.08em; }
 .sheet section { margin-bottom: 5mm; }
