@@ -9,7 +9,7 @@ async function nextCookieStore(): Promise<CookieStore> {
   const jar = await cookies();
   return {
     get: (n) => jar.get(n)?.value,
-    set: (n, v) => { jar.set(n, v, { httpOnly: true, sameSite: 'lax', path: '/' }); },
+    set: (n, v) => { jar.set(n, v, { httpOnly: true, sameSite: 'lax', path: '/', secure: process.env.NODE_ENV === 'production' }); },
     delete: (n) => { jar.delete(n); },
   };
 }
