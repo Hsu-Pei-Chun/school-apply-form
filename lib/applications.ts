@@ -78,20 +78,35 @@ export function createApplication(db: Db, input: CreateApplicationInput): Applic
     .get();
   if (existing) throw new DuplicateApplicationError(existing.id);
 
-  return db.transaction((tx) => {
-    const row: Application = {
-      id: nextApplicationId(tx),
-      studentId: input.studentId,
-      courseBCode: input.courseBCode,
-      barcode: input.studentId + input.courseBCode,
-      status: 'printed',
-      createdAt: new Date().toISOString(),
-      receivedAt: null,
-    };
-    tx.insert(applications).values(row).run();
-    tx.insert(applicationCoursesA).values(coursesA.map((c, i) => ({ applicationId: row.id, seq: i + 1, ...c }))).run();
-    return row;
-  });
+  try {
+    return db.transaction((tx) => {
+      const row: Application = {
+        id: nextApplicationId(tx),
+        studentId: input.studentId,
+        courseBCode: input.courseBCode,
+        barcode: input.studentId + input.courseBCode,
+        status: 'printed',
+        createdAt: new Date().toISOString(),
+        receivedAt: null,
+      };
+      tx.insert(applications).values(row).run();
+      tx.insert(applicationCoursesA).values(coursesA.map((c, i) => ({ applicationId: row.id, seq: i + 1, ...c }))).run();
+      return row;
+    });
+  } catch (e) {
+    // 兩個請求同時通過上面的 existing 檢查、幾乎同時 insert 時，其中一個會在這裡撞到
+    // applications_student_course_uq（或 applications_barcode_uq）。此時重新查一次既有
+    // id，轉成跟一般重複申請同樣的 DuplicateApplicationError，而不是讓 SqliteError 外洩。
+    if ((e as { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      const raced = db
+        .select({ id: applications.id })
+        .from(applications)
+        .where(and(eq(applications.studentId, input.studentId), eq(applications.courseBCode, input.courseBCode)))
+        .get();
+      if (raced) throw new DuplicateApplicationError(raced.id);
+    }
+    throw e;
+  }
 }
 
 function loadDetail(db: Db, where: SQL): ApplicationDetail | undefined {

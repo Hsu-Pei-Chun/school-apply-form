@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDb, Db } from '@/lib/db/client';
-import { students, applicationCoursesA } from '@/lib/db/schema';
+import { students, applications, applicationCoursesA } from '@/lib/db/schema';
 import { createCourse, setCourseActive } from '@/lib/courses';
 import {
   createApplication, getApplication, listApplicationsByStudent, findApplicationByBarcode,
@@ -78,6 +78,44 @@ describe('createApplication', () => {
   it('B 無效時 A 子表不殘留（transaction）', () => {
     expect(() => createApplication(db, { ...base, courseBCode: '11510XXXX999999' })).toThrow();
     expect(db.select().from(applicationCoursesA).all()).toHaveLength(0);
+  });
+  it('併發 race：兩個請求同時通過重複檢查、真正 insert 時才撞到 UNIQUE，仍轉為 DuplicateApplicationError', () => {
+    const SID2 = '113000002';
+    const B3 = '11510CS00200103';
+    db.insert(students).values({ id: SID2, name: '別人', department: 'x' }).run();
+    createCourse(db, { code: B3, name: 'X-Class 統計', teacher: '吳教授' });
+
+    const originalTransaction = db.transaction.bind(db);
+    let raced = false;
+    (db as unknown as { transaction: typeof db.transaction }).transaction = ((fn: Parameters<typeof db.transaction>[0]) => {
+      if (!raced) {
+        raced = true;
+        // 模擬另一個併發請求搶先在真正的 transaction 之前，寫入了同樣的 (studentId, courseBCode)
+        originalTransaction((tx) => {
+          tx.insert(applications).values({
+            id: 'A999999', studentId: SID2, courseBCode: B3, barcode: SID2 + B3,
+            status: 'printed', createdAt: new Date().toISOString(), receivedAt: null,
+          }).run();
+        });
+        const err = Object.assign(new Error('UNIQUE constraint failed: applications.barcode'), { code: 'SQLITE_CONSTRAINT_UNIQUE' });
+        throw err;
+      }
+      return originalTransaction(fn);
+    }) as typeof db.transaction;
+
+    try {
+      let caught: unknown;
+      try {
+        createApplication(db, { studentId: SID2, coursesA: [A1], courseBCode: B3 });
+        expect.unreachable();
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught).toBeInstanceOf(DuplicateApplicationError);
+      expect((caught as DuplicateApplicationError).existingId).toBe('A999999');
+    } finally {
+      (db as unknown as { transaction: typeof db.transaction }).transaction = originalTransaction;
+    }
   });
 });
 
