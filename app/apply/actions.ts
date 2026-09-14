@@ -11,15 +11,12 @@ export async function lookupStudent(studentId: string) {
 }
 
 export async function submitApplication(formData: FormData): Promise<{ error: string } | void> {
-  const input = {
-    studentId: String(formData.get('studentId') ?? '').trim(),
-    courseACode: String(formData.get('courseACode') ?? ''),
-    courseAStatus: String(formData.get('courseAStatus') ?? '').trim() || '已選上',
-    courseBCode: String(formData.get('courseBCode') ?? ''),
-  };
+  const studentId = String(formData.get('studentId') ?? '').trim();
+  const courseBCode = String(formData.get('courseBCode') ?? '');
+  const coursesA = [{ code: String(formData.get('courseACode') ?? ''), name: '(待填)', time: '(待填)', teacher: '(待填)' }];
   let id: string;
   try {
-    id = createApplication(getDb(), input).id;
+    id = createApplication(getDb(), { studentId, coursesA, courseBCode }).id;
   } catch (e) {
     return { error: (e as Error).message };
   }

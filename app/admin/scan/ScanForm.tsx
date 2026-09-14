@@ -54,7 +54,7 @@ export default function ScanForm() {
           {current.kind !== 'not_found' && (
             <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-base text-foreground">
               <dt className="text-muted-fg">學生</dt><dd>{current.studentId}　{current.studentName}</dd>
-              <dt className="text-muted-fg">課程 A</dt><dd>{current.courseACode}　{current.courseAName}</dd>
+              <dt className="text-muted-fg">課程 A</dt><dd>{current.coursesA.map(c => c.code).join('、')}</dd>
               <dt className="text-muted-fg">課程 B</dt><dd>{current.courseBCode}　{current.courseBName}</dd>
               {current.kind === 'already' && (<><dt className="text-muted-fg">原收件時間</dt><dd>{formatDateTime(current.receivedAt)}</dd></>)}
             </dl>

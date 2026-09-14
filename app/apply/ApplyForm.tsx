@@ -45,18 +45,7 @@ export default function ApplyForm({ courses }: { courses: CourseOption[] }) {
       )}
 
       <Field id="courseACode" label="一般課程 A" hint="你目前已選的正規課程">
-        <select id="courseACode" name="courseACode" className="input" required value={courseA} onChange={e => {
-          const a = e.target.value;
-          setCourseA(a);
-          if (courseB === a) setCourseB('');
-        }}>
-          <option value="" disabled>請選擇</option>
-          {courses.map(c => <option key={c.code} value={c.code}>{c.code}　{c.name}</option>)}
-        </select>
-      </Field>
-
-      <Field id="courseAStatus" label="A 課程修課狀態" hint="例：已選上、加簽中">
-        <input id="courseAStatus" name="courseAStatus" className="input" defaultValue="已選上" />
+        <input id="courseACode" name="courseACode" className="input" required value={courseA} onChange={e => setCourseA(e.target.value)} />
       </Field>
 
       <Field id="courseBCode" label="X-Class 課程 B" hint="欲申請的 X-Class 課程，需事先與授課教師確認">
