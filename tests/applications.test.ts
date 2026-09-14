@@ -55,6 +55,10 @@ describe('createApplication', () => {
   it('A 課程 6 門', () => {
     expect(() => createApplication(db, { ...base, coursesA: [A1, A1, A1, A1, A1, A1] })).toThrow('一般課程最多五門');
   });
+  it('A 課程欄位超過 100 字', () => {
+    const longName = 'A'.repeat(101);
+    expect(() => createApplication(db, { ...base, coursesA: [{ ...A1, name: longName }] })).toThrow('一般課程欄位最多 100 字');
+  });
   it('同學生同 B 課程第二次被拒並回傳既有 id', () => {
     const first = createApplication(db, base);
     try {

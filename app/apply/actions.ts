@@ -7,7 +7,7 @@ import { createApplication, DuplicateApplicationError, MAX_COURSES_A, CourseAInp
 
 function parseCoursesA(formData: FormData): CourseAInput[] {
   const rows: CourseAInput[] = [];
-  for (let i = 0; i < MAX_COURSES_A; i++) {
+  for (let i = 0; i <= MAX_COURSES_A; i++) {
     const get = (f: string) => formData.get(`courseA[${i}][${f}]`);
     if (get('code') === null && get('name') === null) continue;
     rows.push({

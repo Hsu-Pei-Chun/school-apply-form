@@ -43,7 +43,7 @@ export default function CourseARows({ rows, max, onChange }: Props) {
               return (
                 <div key={f} className="flex flex-col gap-1.5">
                   <label htmlFor={id} className="text-sm font-medium">{label}</label>
-                  <input id={id} name={`courseA[${i}][${f}]`} className="input" required value={r[f]} onChange={e => update(i, f, e.target.value)} placeholder={hint} />
+                  <input id={id} name={`courseA[${i}][${f}]`} className="input" required maxLength={100} value={r[f]} onChange={e => update(i, f, e.target.value)} placeholder={hint} />
                 </div>
               );
             })}

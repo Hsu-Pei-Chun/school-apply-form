@@ -60,6 +60,9 @@ function normalizeCoursesA(input: CourseAInput[]): CourseAInput[] {
     throw new Error('一般課程至少一門，且每門四欄皆必填');
   }
   if (rows.length > MAX_COURSES_A) throw new Error('一般課程最多五門');
+  if (rows.some(r => r.code.length > 100 || r.name.length > 100 || r.time.length > 100 || r.teacher.length > 100)) {
+    throw new Error('一般課程欄位最多 100 字');
+  }
   return rows;
 }
 
