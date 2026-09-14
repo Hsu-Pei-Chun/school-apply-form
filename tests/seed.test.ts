@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createDb } from '@/lib/db/client';
-import { students } from '@/lib/db/schema';
+import { students, courses } from '@/lib/db/schema';
 import { seed } from '@/lib/seed';
 
 describe('seed', () => {
@@ -25,5 +25,12 @@ describe('seed', () => {
     const result = seed(db, { ifEmpty: false });
     expect(result).toBe('seeded');
     expect(db.select().from(students).all().length).toBe(2000);
+  });
+
+  it('學號 9 碼、科號 15 碼', () => {
+    const db = createDb(':memory:');
+    seed(db, { ifEmpty: false });
+    expect(db.select().from(students).limit(1).get()?.id).toBe('113000001');
+    expect(db.select().from(courses).all().every(c => c.code.length === 15)).toBe(true);
   });
 });

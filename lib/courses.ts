@@ -11,6 +11,7 @@ export function listActiveCourses(db: Db): Course[] {
 }
 
 export function createCourse(db: Db, input: { code: string; name: string; teacher: string }): Course {
+  if (input.code.length !== 15) throw new Error('科號必須為 15 碼');
   const exists = db.select().from(courses).where(eq(courses.code, input.code)).get();
   if (exists) throw new Error('課程代碼已存在');
   const row: Course = { ...input, isActive: 1, createdAt: new Date().toISOString() };
