@@ -1,6 +1,6 @@
 import { count } from 'drizzle-orm';
 import { Db } from './db/client';
-import { students, courses, applications } from './db/schema';
+import { students, courses, applications, applicationCoursesA } from './db/schema';
 import { createCourse } from './courses';
 
 const SURNAMES = ['王', '李', '張', '劉', '陳', '楊', '黃', '趙', '吳', '周', '林', '徐', '許', '蔡', '鄭'];
@@ -21,6 +21,7 @@ export function seed(db: Db, { ifEmpty }: { ifEmpty: boolean }): 'seeded' | 'ski
   }
 
   db.transaction((tx) => {
+    tx.delete(applicationCoursesA).run();
     tx.delete(applications).run();
     tx.delete(courses).run();
     tx.delete(students).run();
