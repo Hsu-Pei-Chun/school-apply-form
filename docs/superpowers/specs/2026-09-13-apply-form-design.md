@@ -1,40 +1,49 @@
 # 課程申請表系統 — 設計文件
 
-日期：2026-09-13（v2：對齊清大 X-Class 申請表結構、新增 UI 設計原則）
-狀態：v1 已實作並合併至 main；v2 為本次修訂範圍
+日期：2026-09-14（v3：依校方回饋調整——A 課程改手填多門、條碼改學號+科號置右上、假登入取代手填學號）
+狀態：v1、v2 已實作並合併至 main，部署於 Render；v3 為本次修訂範圍
 
 ## 1. 背景與目標
 
-學校約 2000 名學生、100 門課程。學生申請 X-Class 課程時，系統自動產生一張申請表，
-表上印有條碼；學生列印紙本、取得教師簽章與本人簽名後送交課務組，行政人員以掃描槍掃條碼登記收件。
-課程清單會持續變動，行政人員需能隨時新增或停用課程。
+學校約 2000 名學生、100 門 X-Class 課程。學生申請 X-Class 課程時，系統自動產生一張申請表，
+表上印有條碼；學生列印紙本、取得教師簽章與本人簽名後送交課務組，行政人員以掃描槍掃條碼登記收件，
+掃到的內容要能直接寫入校方既有系統。X-Class 課程清單會持續變動，行政人員需能隨時新增或停用。
 
 表單結構參考國立清華大學課務組「X-Class 課程修課申請表」
 （https://curricul.site.nthu.edu.tw/p/404-1208-314422.php）：
-**一張申請表綁定兩門課**——學生已修的一般課程 A，與欲申請的 X-Class 課程 B。
+一張申請表 = 學生已修的一般課程 A（**一至多門，可為校內或校外，學生手填**）+ 欲申請的 X-Class 課程 B（一門，從清單選）。
 
-現階段目標：以假資料做出可 demo 的雛型，證明「申請 → 列印 → 掃描收件」流程可行，且畫面達到可給學校看的品質。
+### v3 依校方回饋的變更摘要
+
+| 回饋 | 對應變更 |
+|---|---|
+| 學生登入校務系統後應自動帶出學號 | 新增 `/login` 假登入 + `lib/auth.ts` 單一替換點；`/apply` 學號唯讀 |
+| A 課程可能是校內或校外、可能不只一門 | A 課程改為學生手填 1–5 門（科號、課名、上課時間、任課教師），獨立子表 |
+| 條碼改右上角，內容為學號 + 科號，供校方系統寫入 | 條碼內容 = 學號 9 碼 + B 科號 15 碼（24 碼、無分隔符），置於抬頭右側 |
+| 同一學生對同一 X-Class 課程不可重複申請 | server + DB UNIQUE 擋下，並提供原申請表重印連結 |
+| 申請畫面要同時看到該學生已申請的 X-Class | `/apply` 下半部為「我的申請紀錄」報表 |
 
 ## 2. 範圍
 
 ### 做
 
-- 學生輸入學號、選課程 A 與課程 B，產生申請表
-- 申請表 A4 版型（清大格式），含 Code 128 條碼，瀏覽器直接列印
+- 假登入（輸入學號即登入，不驗密碼）→ `/apply` 帶出學號、姓名、系級
+- 學生手填 1–5 門一般課程 A、選一門 X-Class 課程 B，產生申請表
+- 申請表 A4 版型（清大格式），條碼於右上角，瀏覽器直接列印
 - 行政後台：課程新增 / 啟用 / 停用（含授課教師）
-- 行政後台：掃描條碼登記收件，處理重複掃描與無效條碼
-- 假資料產生腳本：2000 學生、100 課程
-- 依第 10 節設計原則實作四個頁面的視覺
+- 行政後台：掃描 24 碼條碼登記收件，處理重複掃描與無效條碼；亦相容流水號
+- 假資料：2000 學生（9 碼學號）、100 課程（15 碼科號）
+- 依第 10 節設計原則實作視覺
 
-### 不做（YAGNI，等真資料進來再評估）
+### 不做（YAGNI）
 
-- 登入 / 身分驗證
+- 真實 SSO / 密碼驗證（`lib/auth.ts` 預留替換點）
+- 後台登入
 - Email 或任何通知
-- 申請額度或截止日的系統限制（截止日只印在表上）
-- 表單版型客製化
+- 申請額度或截止日的系統限制
+- A 課程進主檔或統計
 - 學生 / 課程資料匯入 UI
-- 正式部署
-- 深色模式（行政工具，先只做淺色）
+- 深色模式
 
 ## 3. 技術選型
 
@@ -42,60 +51,87 @@
 |---|---|---|
 | 框架 | Next.js 15 (App Router) + TypeScript | 單一 repo、`npm run dev` 即可 demo |
 | 資料庫 | SQLite (`better-sqlite3`) + Drizzle ORM + drizzle-kit migrations | 零安裝；schema 單一來源；換 Postgres 只改 driver |
+| Session | httpOnly cookie，內容為學號（demo 不簽章） | 假登入只需識別身分；換 SSO 時改 `lib/auth.ts` |
 | 條碼 | `bwip-js` 產 SVG，內嵌於頁面 | 向量圖列印不糊；不需後端產 PDF |
 | 列印 | HTML A4 版型 + `@media print` + `window.print()` | 避開後端 PDF 的中文字型嵌入問題 |
-| 樣式 | Tailwind CSS + `globals.css` 定義 CSS 變數 token | 四個頁面不值得引入元件庫；token 讓顏色只定義一次 |
+| 樣式 | Tailwind CSS v4 + `globals.css` 定義 token | token 讓顏色只定義一次 |
 | 測試 | Vitest | 輕量，與 Next.js 相容 |
+| 部署 | Dockerfile（Next standalone）→ Render Free / Railway | SQLite 需要真實檔案系統 |
 
 ## 4. 資料模型
 
 ```
 students
-  id          TEXT PK      學號
+  id          TEXT PK      學號，固定 9 碼數字（CHECK length = 9）
   name        TEXT         姓名
   department  TEXT         系級（例：資工系 二年級）
   is_active   INTEGER      1/0
 
-courses
-  code        TEXT PK      課程代碼
+courses                    X-Class 課程主檔
+  code        TEXT PK      科號，固定 15 碼英數（CHECK length = 15）
   name        TEXT         課程名稱
   teacher     TEXT         授課教師
   is_active   INTEGER      1/0（停用不刪除，保留舊申請單連結）
   created_at  TEXT         ISO 8601
 
 applications
-  id                  TEXT PK    流水號，格式 A + 6 位數字，自 A000001 起
-  student_id          TEXT FK → students.id
-  course_a_code       TEXT FK → courses.code   一般課程（學生已選）
-  course_a_status     TEXT                     A 課程修課狀態，學生自填（例：已選上 / 加簽中）
-  course_b_code       TEXT FK → courses.code   X-Class 課程（欲申請）
-  status              TEXT       'printed' | 'received'（DB 層 CHECK）
-  created_at          TEXT       ISO 8601
-  received_at         TEXT NULL  ISO 8601，收件時寫入
+  id             TEXT PK    流水號，格式 A + 6 位數字（內部主鍵，不印條碼）
+  student_id     TEXT FK → students.id
+  course_b_code  TEXT FK → courses.code   X-Class 課程（欲申請）
+  barcode        TEXT       = student_id || course_b_code，24 碼（CHECK length = 24），建立時寫入；UNIQUE
+  UNIQUE (student_id, course_b_code)   同一學生同一 X-Class 課程只能有一張
+  status         TEXT       'printed' | 'received'（DB 層 CHECK）
+  created_at     TEXT       ISO 8601
+  received_at    TEXT NULL  ISO 8601，收件時寫入
+
+application_courses_a      一般課程 A（一對多，學生手填）
+  id              INTEGER PK AUTOINCREMENT
+  application_id  TEXT FK → applications.id
+  seq             INTEGER  1..5，同一 application 內唯一
+  code            TEXT     科號（課號），自由文字
+  name            TEXT     課名
+  time            TEXT     上課時間
+  teacher         TEXT     任課教師
 ```
 
 原則：
 
-- `applications` 一筆 = 一張紙。同一學生重複申請會產生新的一筆，各有獨立流水號。
-- 條碼內容 = `applications.id`。條碼是查表的 key，不承載業務資料。
+- `applications` 一筆 = 一張紙。**同一學生對同一 B 課程只能有一筆**（不論狀態）；重複申請時 server 拒絕並回傳既有流水號供重印。
+- 條碼承載業務資料（學號 + B 科號），因為校方收件系統要直接讀取寫入；因上一條，條碼在系統內唯一。流水號保留為內部 PK。
+- 掃描時以條碼直接對到唯一一筆申請單。
+- A 課程為自由文字，不與 `courses` 關聯；每張申請單 1–5 門，`seq` 保序。
 - 主檔（students / courses）用 `is_active` 停用，不物理刪除。
-- A、B 兩門課從同一份 `courses` 清單選；A ≠ B（server 端驗證）。
-- v1 → v2 的更名：`subjects` → `courses`、`class_name` → `department`、`subject_code` → `course_a_code` + `course_b_code`。
+- v2 → v3 為破壞性變更：重產 migration `0000`，重 seed。
 
 ## 5. 頁面與流程
 
+### 認證（`lib/auth.ts`）
+
+- `getCurrentStudent(): Student | null`：讀 cookie `sid` → 查 `students`；找不到或 `is_active = 0` 回 null
+- `login(studentId)` / `logout()`：寫入 / 清除 cookie
+- **這是接真 SSO 時唯一要換的檔案**；頁面與 Server Action 只呼叫 `getCurrentStudent()`
+
 ### 共用 Layout
 
-- 頂部導覽列（Primary 深藍底、白字）：左側校名／系統名，右側三個入口「學生申請」「課程管理」「掃描收件」，當前頁高亮。
-- 內容區置中，最寬 720px（列印頁例外），卡片白底、圓角 8px、細邊框。
+- 頂部導覽列（Primary 深藍底、白字）：左側校名／系統名，右側入口「學生申請」「課程管理」「掃描收件」；已登入時右側顯示「學號 姓名｜登出」
+- 內容區置中，最寬 720px（列印頁例外）
+
+### `/login` — 假登入
+
+- 一個欄位「學號」+ 按鈕「登入」；說明文字「Demo 環境：輸入學號即可登入，正式環境將由校務系統單一登入取代」
+- 學號不存在 → 欄位下方錯誤 `role="alert"`
+- 成功 → 導向 `/apply`（或 `?next=` 指定頁）
 
 ### `/apply` — 學生申請
 
-1. 輸入學號 → blur 後即時查詢；欄位下方顯示「✓ 資工系 二年級 王小明」（成功綠）或「查無此學號」（錯誤紅，`role="alert"`）
-2. 選一般課程 A（下拉，只列 `is_active = 1`）+ 填修課狀態（文字欄，預設「已選上」）
-3. 選 X-Class 課程 B（下拉，同一清單，排除已選的 A）
-4. 按「產生申請表」→ 按鈕進入 loading → server 建立 `applications` 記錄 → 導向 `/apply/[id]`
-5. 每個欄位都有可見 label 與一行說明文字；錯誤訊息緊貼欄位下方
+1. 未登入 → 導向 `/login?next=/apply`
+2. 頂部唯讀卡片顯示：學號、姓名、系級（不可編輯）
+3. **一般課程 A**（至少 1 門、最多 5 門）：每門一張小卡，四個文字欄位——科號（課號）、課名、上課時間、任課教師，皆必填；「＋ 新增一門」按鈕（達 5 門時停用）；每張卡可刪除（只剩 1 門時刪除鈕停用）。表單欄位名 `courseA[i][code]` 等
+4. **X-Class 課程 B**：下拉，只列 `is_active = 1`，顯示「科號　課名（教師）」
+5. 按「產生申請表」→ loading → server 驗證（A 至少 1 門且每欄非空、B 存在且啟用、**該學生尚未申請過此 B 課程**）→ 同一 transaction 寫入 `applications` + `application_courses_a` → 導向 `/apply/[id]`
+6. 每個欄位都有可見 label；錯誤訊息緊貼欄位下方或表單頂部 `role="alert"`
+7. 已申請過 → 表單頂部紅色提示「你已申請過此 X-Class 課程」+ 連結「查看／重新列印原申請表」→ `/apply/[原流水號]`
+8. **下半部「我的申請紀錄」**（獨立 Card，位於表單下方）：列出該學生所有申請單，依申請時間新→舊；欄位：X-Class 科號、課名、授課教師、申請日期、狀態 Badge（`printed` → 「已產生」灰、`received` → 「已收件」綠）、操作「列印」連結 → `/apply/[id]`。無紀錄時顯示「尚未申請任何 X-Class 課程」。產生新申請單導回 `/apply` 時此列表即時反映。
 
 ### `/apply/[id]` — 申請表列印頁
 
@@ -103,96 +139,98 @@ applications
 
 紙張內容（依清大格式）：
 
-1. 抬頭：「國立○○大學 X-Class 課程修課申請表」+ 學期
+1. **抬頭列**：左側「國立○○大學 X-Class 課程修課申請表」+ 學期；**右側條碼區**：Code 128 SVG（內容 24 碼）+ 下方人類可讀 24 碼文字（等寬字）。條碼區寬約 60mm、四周留白 ≥ 5mm
 2. 申請人：學號、姓名、系級
-3. 一般課程 A：課程代碼、課程名稱、修課狀態
-4. X-Class 課程 B：課程代碼、課程名稱、授課教師
-5. 同意條款（固定文字）：不得要求補課、調整教學進度、請假延交作業等額外安排；考試衝突不予改期或補考；風險自行承擔
+3. 一般課程 A：表格，每門一列——`#｜科號｜課名｜上課時間｜任課教師`
+4. X-Class 課程 B：科號、課程名稱、授課教師
+5. 同意條款（固定文字）
 6. 簽章區：X-Class 授課教師簽章 ／ 學生簽名 ／ 日期
 7. 送件說明：於開學第二週週五前送交課務組
-8. 條碼區（右下）：Code 128 SVG，內容為流水號；下方文字印流水號、學號、B 課程代碼
+8. 頁尾小字：流水號（內部參考用）
 
-流水號不存在 → 404。
+任何人知道流水號都可開此頁（demo 不做擁有者驗證）。流水號不存在 → 404。
 
-### `/admin/courses` — 課程管理（v1 為 `/admin/subjects`，更名）
+### `/admin/courses` — 課程管理
 
-- 頂部卡片：新增表單（代碼、名稱、授課教師），代碼重複顯示錯誤
-- 列表：斑馬紋表格；欄位代碼、名稱、教師、狀態（色標籤：啟用綠／停用灰）、建立時間、切換按鈕（outline 樣式）
+- 頂部卡片：新增表單（科號 15 碼、名稱、授課教師），科號長度不符或重複顯示錯誤
+- 列表：斑馬紋表格；科號（等寬字）、名稱、教師、狀態 Badge、建立時間、切換按鈕
 
 ### `/admin/scan` — 掃描收件
 
-- 大字輸入框置中（字級 ≥ 24px，遠看得到），頁面載入時自動聚焦；掃描槍輸入流水號 + Enter 即提交
-- 結果用大面積色塊卡片：
-  - 成功：綠底，「收件成功」+ 學生／A／B 課程
-  - 已收件：黃底，顯示原 `received_at`，不覆寫
-  - 查無此號：紅底
-- 提交後立即清空 input 並重新聚焦
-- 下方列出本次 session 最近 5 筆掃描紀錄（流水號、學生、結果、時間）
+- 大字輸入框置中、自動聚焦；掃描槍輸入 + Enter 即提交
+- 輸入解析：
+  - 24 碼 → 以 `barcode` 欄位直接查唯一一筆申請單
+  - `A` + 6 位數字 → 以流水號查（行政人員手動查用）
+  - 其他 → 格式錯誤
+- 結果色塊卡片：
+  - 成功：綠底，「收件成功」+ 學生、A 課程列表（多列）、B 課程
+  - 已收件：黃底，顯示原 `received_at`
+  - 查無：紅底，區分「格式錯誤」與「查無此申請單」
+- 提交後立即清空 input 並重新聚焦；下方最近 5 筆
 
 ## 6. 錯誤處理
 
 | 情境 | 處理 |
 |---|---|
-| 學號不存在 | 欄位下方錯誤，禁止送出 |
-| 送出時課程已停用（舊分頁） | server 拒絕，回傳錯誤訊息 |
-| A 與 B 為同一門課 | server 拒絕：「一般課程與 X-Class 課程不可相同」 |
-| 流水號格式不符或不存在 | 掃描頁紅色卡片，不拋例外 |
-| 重複掃描 | 黃色卡片，保留第一次收件時間 |
-| 課程代碼重複新增 | server 拒絕，表單顯示錯誤 |
+| 登入學號不存在 / 已停用 | `/login` 欄位錯誤，不建 session |
+| 未登入進 `/apply` | 導向 `/login?next=/apply` |
+| session 學號已不存在（資料重 seed） | 視為未登入，清 cookie 並導向 `/login` |
+| A 課程 0 門或任一欄空白 | server 拒絕：「一般課程至少一門，且每門四欄皆必填」 |
+| A 課程超過 5 門 | server 拒絕：「一般課程最多五門」 |
+| 送出時 B 課程已停用或不存在 | server 拒絕：「課程不存在或已停用」 |
+| 同學生已申請過同一 B 課程 | server 拒絕：「你已申請過此 X-Class 課程」，回傳既有流水號；DB UNIQUE 為最後防線 |
+| 掃描輸入非 24 碼且非流水號 | 紅卡「條碼格式錯誤」 |
+| 24 碼拆出的學號/科號查無申請單 | 紅卡「查無此申請單」 |
+| 重複掃描 | 黃卡，保留第一次收件時間 |
+| 課程科號非 15 碼 / 重複新增 | server 拒絕，表單顯示錯誤 |
 
 ## 7. 假資料
 
-`scripts/seed.ts`：
+`lib/seed.ts`（`npm run seed`，`--if-empty` 供容器啟動）：
 
-- 2000 學生：學號 `S0001–S2000`，姓名以常見中文姓名隨機組合，系級由 10 個系 × 4 個年級組合
-- 100 課程：代碼 `C001–C100`，名稱以「微積分 / 普通物理 / 計算機概論 …」加編號組合，教師以常見姓氏 + 「教授」
-- 執行方式 `npm run seed`；重複執行先清空再寫入
+- 2000 學生：學號 9 碼 = `113` + 6 位流水（`113000001`–`113002000`），姓名隨機組合，系級 10 系 × 4 年級
+- 100 課程：科號 15 碼 = `11510` + 系所 4 碼（`EECS`/`MATH`/`PHYS`/`CHEM`/`ECON`/`CHIN`/`LANG`/`LIFE`/`MSE0`/`CS00`）+ 6 碼課號（`200101` 起）= 15 碼純英數無空格；名稱「微積分 / 普通物理 …」+ 編號；教師「姓氏 + 教授」
+- 不預先產生申請單
 
 ## 8. 測試策略
 
 單元 / 整合測試（Vitest，記憶體 SQLite）：
 
-- 建立申請單：流水號格式正確且遞增；停用課程被拒；學號不存在被拒；A = B 被拒
-- 掃描收件：`printed → received` 並寫入 `received_at`；重複掃描不覆寫；無效流水號回傳明確錯誤
-- 課程管理：新增成功；代碼重複被拒；停用後不出現在申請頁下拉
-- 時間格式：UTC → 台北時區
+- 認證：`login` 寫 cookie、`getCurrentStudent` 對不存在學號回 null（以可注入的 cookie store 測）
+- 建立申請單：流水號遞增；`barcode` = 學號 + B 科號；A 課程 0 門 / 6 門 / 欄位空白被拒；B 停用被拒；**同學生同 B 課程第二次被拒且回傳既有 id**；同學生不同 B 課程可以；A 課程順序保留；transaction（B 無效時 A 子表不殘留）
+- 掃描：24 碼 → 唯一一筆 `printed → received`；流水號路徑仍可用；格式錯誤與查無分開回報；重複掃描不覆寫
+- 申請紀錄：`listApplicationsByStudent` 只回該學生、新→舊、含 B 課程名稱與教師
+- 課程管理：科號非 15 碼被拒；重複被拒
+- 條碼 SVG：內容 24 碼可產生
+- Dockerfile：`HOSTNAME=0.0.0.0`
 
 手動驗證：
 
-- `/apply/[id]` 用 Chrome 列印預覽確認 A4 一頁、工具列隱藏、條碼清晰
-- 以手機條碼 App 或掃描槍掃列印稿，確認 `/admin/scan` 正確登記
-- 四個頁面在 375px / 768px / 1440px 寬度不出現橫向捲軸
+- 登入 → 填 3 門 A → 選 B → 列印預覽：條碼在右上、A 表格三列、一頁 A4
+- 回 `/apply` 下半部看到剛才那筆；掃描收件後重新整理狀態變「已收件」
+- 手機掃右上角條碼讀出 24 碼；`/admin/scan` 貼上後成功登記
+- 375 / 768 / 1440 寬度無橫向捲軸
 
 ## 9. 專案結構（預期）
 
 ```
 school-apply-form/
   app/
-    layout.tsx                共用導覽列
-    globals.css               Tailwind + CSS 變數 token
-    apply/page.tsx
-    apply/ApplyForm.tsx
-    apply/actions.ts
-    apply/[id]/page.tsx
-    apply/[id]/print.css
-    admin/courses/page.tsx
-    admin/courses/actions.ts
-    admin/scan/page.tsx
-    admin/scan/ScanForm.tsx
-    admin/scan/actions.ts
-  components/                 Button / Input / Select / Badge / Card（純 Tailwind，無外部元件庫）
+    layout.tsx / globals.css / page.tsx
+    login/page.tsx, login/LoginForm.tsx, login/actions.ts
+    apply/page.tsx, apply/ApplyForm.tsx, apply/CourseARows.tsx, apply/actions.ts
+    apply/[id]/page.tsx, print.css, PrintToolbar.tsx
+    admin/courses/…, admin/scan/…
+  components/                 Button / Field / Badge / Card / icons / Nav
   lib/
-    db/schema.ts
-    db/client.ts
-    applications.ts
-    courses.ts
-    students.ts
-    barcode.ts
-    format.ts
-  drizzle/                    migrations（drizzle-kit generate）
-  design-system/school-apply-form/MASTER.md   設計系統工具產出的原始建議
+    auth.ts                   getCurrentStudent / login / logout（SSO 替換點）
+    db/schema.ts, db/client.ts
+    applications.ts           createApplication / getApplication / listApplicationsByStudent / receiveByBarcode / receiveApplication
+    courses.ts, students.ts, barcode.ts, format.ts, seed.ts
+  drizzle/                    migrations（重產）
   scripts/seed.ts
   tests/
+  Dockerfile, railway.toml, README.md
 ```
 
 ## 10. UI 設計原則
