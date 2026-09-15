@@ -1,7 +1,7 @@
 # 課程申請表系統 — 設計文件
 
-日期：2026-09-14（v3：依校方回饋調整——A 課程改手填多門、條碼改學號+科號置右上、假登入取代手填學號）
-狀態：v1、v2 已實作並合併至 main，部署於 Render；v3 為本次修訂範圍
+日期：2026-09-15（v4：X-Class 課程加上課時間、課程批次匯入）
+狀態：v1–v3 已實作並合併至 main，部署於 Render；v4 為本次修訂範圍
 
 ## 1. 背景與目標
 
@@ -23,6 +23,13 @@
 | 同一學生對同一 X-Class 課程不可重複申請 | server + DB UNIQUE 擋下，並提供原申請表重印連結 |
 | 申請畫面要同時看到該學生已申請的 X-Class | `/apply` 下半部為「我的申請紀錄」報表 |
 
+### v4 依校方回饋的變更摘要
+
+| 回饋 | 對應變更 |
+|---|---|
+| 這張表就是為了衝堂特許，X-Class 課程最重要的是上課時間 | `courses.time`（自由文字，如 `M1M2`、`T1T2R1R2`），下拉、申請表、掃描結果皆顯示 |
+| 首次要一次匯入 54 科，之後仍要能逐筆新增 | `/admin/courses` 新增「批次匯入」：貼上 Excel 內容或上傳 CSV → 預覽 → 確認；逐筆新增保留 |
+
 ## 2. 範圍
 
 ### 做
@@ -30,7 +37,7 @@
 - 假登入（輸入學號即登入，不驗密碼）→ `/apply` 帶出學號、姓名、系級
 - 學生手填 1–5 門一般課程 A、選一門 X-Class 課程 B，產生申請表
 - 申請表 A4 版型（清大格式），條碼於右上角，瀏覽器直接列印
-- 行政後台：課程新增 / 啟用 / 停用（含授課教師）
+- 行政後台：課程新增 / 啟用 / 停用（含授課教師、上課時間）；批次匯入（貼上或 CSV，預覽後整批寫入）
 - 行政後台：掃描 24 碼條碼登記收件，處理重複掃描與無效條碼；亦相容流水號
 - 假資料：2000 學生（9 碼學號）、100 課程（15 碼科號）
 - 依第 10 節設計原則實作視覺
@@ -42,7 +49,9 @@
 - Email 或任何通知
 - 申請額度或截止日的系統限制
 - A 課程進主檔或統計
-- 學生 / 課程資料匯入 UI
+- 學生資料匯入 UI
+- Excel `.xlsx` 直接解析（貼上或 CSV 已足夠）
+- 節次衝堂自動比對（衝堂由人工判斷，系統只負責印出時間）
 - 深色模式
 
 ## 3. 技術選型
@@ -71,6 +80,7 @@ courses                    X-Class 課程主檔
   code        TEXT PK      科號，固定 15 碼英數（CHECK length = 15）
   name        TEXT         課程名稱
   teacher     TEXT         授課教師
+  time        TEXT         上課時間，自由文字（例：M1M2、T1T2R1R2），不做格式驗證
   is_active   INTEGER      1/0（停用不刪除，保留舊申請單連結）
   created_at  TEXT         ISO 8601
 
@@ -101,7 +111,7 @@ application_courses_a      一般課程 A（一對多，學生手填）
 - 掃描時以條碼直接對到唯一一筆申請單。
 - A 課程為自由文字，不與 `courses` 關聯；每張申請單 1–5 門，`seq` 保序。
 - 主檔（students / courses）用 `is_active` 停用，不物理刪除。
-- v2 → v3 為破壞性變更：重產 migration `0000`，重 seed。
+- v2 → v3、v3 → v4 皆為破壞性變更：重產 migration `0000`，重 seed。
 
 ## 5. 頁面與流程
 
@@ -127,7 +137,7 @@ application_courses_a      一般課程 A（一對多，學生手填）
 1. 未登入 → 導向 `/login?next=/apply`
 2. 頂部唯讀卡片顯示：學號、姓名、系級（不可編輯）
 3. **一般課程 A**（至少 1 門、最多 5 門）：每門一張小卡，四個文字欄位——科號（課號）、課名、上課時間、任課教師，皆必填；「＋ 新增一門」按鈕（達 5 門時停用）；每張卡可刪除（只剩 1 門時刪除鈕停用）。表單欄位名 `courseA[i][code]` 等
-4. **X-Class 課程 B**：下拉，只列 `is_active = 1`，顯示「科號　課名（教師）」
+4. **X-Class 課程 B**：下拉，只列 `is_active = 1`，顯示「科號　課名（教師）　上課時間」
 5. 按「產生申請表」→ loading → server 驗證（A 至少 1 門且每欄非空、B 存在且啟用、**該學生尚未申請過此 B 課程**）→ 同一 transaction 寫入 `applications` + `application_courses_a` → 導向 `/apply/[id]`
 6. 每個欄位都有可見 label；錯誤訊息緊貼欄位下方或表單頂部 `role="alert"`
 7. 已申請過 → 表單頂部紅色提示「你已申請過此 X-Class 課程」+ 連結「查看／重新列印原申請表」→ `/apply/[原流水號]`
@@ -142,7 +152,7 @@ application_courses_a      一般課程 A（一對多，學生手填）
 1. **抬頭列**：左側「國立○○大學 X-Class 課程修課申請表」+ 學期；**右側條碼區**：Code 128 SVG（內容 24 碼）+ 下方人類可讀 24 碼文字（等寬字）。條碼區寬約 60mm、四周留白 ≥ 5mm
 2. 申請人：學號、姓名、系級
 3. 一般課程 A：表格，每門一列——`#｜科號｜課名｜上課時間｜任課教師`
-4. X-Class 課程 B：科號、課程名稱、授課教師
+4. X-Class 課程 B：科號、課程名稱、授課教師、**上課時間**
 5. 同意條款（固定文字）
 6. 簽章區：X-Class 授課教師簽章 ／ 學生簽名 ／ 日期
 7. 送件說明：於開學第二週週五前送交課務組
@@ -152,8 +162,14 @@ application_courses_a      一般課程 A（一對多，學生手填）
 
 ### `/admin/courses` — 課程管理
 
-- 頂部卡片：新增表單（科號 15 碼、名稱、授課教師），科號長度不符或重複顯示錯誤
-- 列表：斑馬紋表格；科號（等寬字）、名稱、教師、狀態 Badge、建立時間、切換按鈕
+- 卡片一「批次匯入」：
+  - `textarea` 貼上 Excel 內容，每行一科：`科號 ⇥ 課名 ⇥ 授課教師 ⇥ 上課時間`；分隔符自動偵測（Tab 優先，其次逗號）；第一行若含「科號」視為標題列跳過；也可上傳 `.csv`/`.txt` 檔，內容讀進同一 textarea
+  - 按「預覽」→ 逐行解析結果表：每行顯示科號、課名、教師、時間、狀態——`新增`（綠）／`已存在，略過`（黃）／`錯誤：<原因>`（紅，原因：欄位數不足、科號非 15 碼英數、課名/教師/時間空白、同批內科號重複）
+  - 有任何紅字行 → 「確認匯入」按鈕停用，提示先修正；否則顯示「確認匯入 N 筆（略過 M 筆）」
+  - 確認 → 整批一個 transaction 寫入；成功後顯示「已匯入 N 筆」並清空 textarea
+  - 解析與驗證為純函式 `lib/course-import.ts`：`parseCourseImport(text): ParsedRow[]`、`planCourseImport(db, rows): ImportPlan`、`applyCourseImport(db, plan): number`
+- 卡片二「逐筆新增」：科號 15 碼、名稱、授課教師、上課時間，皆必填；科號長度/英數不符或重複顯示錯誤
+- 列表：斑馬紋表格；科號（等寬字）、名稱、教師、時間、狀態 Badge、建立時間、切換按鈕
 
 ### `/admin/scan` — 掃描收件
 
@@ -163,7 +179,7 @@ application_courses_a      一般課程 A（一對多，學生手填）
   - `A` + 6 位數字 → 以流水號查（行政人員手動查用）
   - 其他 → 格式錯誤
 - 結果色塊卡片：
-  - 成功：綠底，「收件成功」+ 學生、A 課程列表（多列）、B 課程
+  - 成功：綠底，「收件成功」+ 學生、A 課程列表（多列）、B 課程（含上課時間）
   - 已收件：黃底，顯示原 `received_at`
   - 查無：紅底，區分「格式錯誤」與「查無此申請單」
 - 提交後立即清空 input 並重新聚焦；下方最近 5 筆
@@ -183,13 +199,16 @@ application_courses_a      一般課程 A（一對多，學生手填）
 | 24 碼拆出的學號/科號查無申請單 | 紅卡「查無此申請單」 |
 | 重複掃描 | 黃卡，保留第一次收件時間 |
 | 課程科號非 15 碼 / 重複新增 | server 拒絕，表單顯示錯誤 |
+| 批次匯入任一行錯誤 | 預覽標紅，整批不可匯入 |
+| 批次匯入科號已存在 | 預覽標黃、略過，不更新既有資料 |
+| 批次匯入同批科號重複 | 後出現者標紅 |
 
 ## 7. 假資料
 
 `lib/seed.ts`（`npm run seed`，`--if-empty` 供容器啟動）：
 
 - 2000 學生：學號 9 碼 = `113` + 6 位流水（`113000001`–`113002000`），姓名隨機組合，系級 10 系 × 4 年級
-- 100 課程：科號 15 碼 = `11510` + 系所 4 碼（`EECS`/`MATH`/`PHYS`/`CHEM`/`ECON`/`CHIN`/`LANG`/`LIFE`/`MSE0`/`CS00`）+ 6 碼課號（`200101` 起）= 15 碼純英數無空格；名稱「微積分 / 普通物理 …」+ 編號；教師「姓氏 + 教授」
+- 100 課程：科號 15 碼 = `11510` + 系所 4 碼（`EECS`/`MATH`/`PHYS`/`CHEM`/`ECON`/`CHIN`/`LANG`/`LIFE`/`MSE0`/`CS00`）+ 6 碼課號（`200101` 起）= 15 碼純英數無空格；名稱「微積分 / 普通物理 …」+ 編號；教師「姓氏 + 教授」；上課時間輪流取 `M1M2` / `T3T4` / `W5W6` / `R7R8` / `F1F2` / `M3M4R3R4`
 - 不預先產生申請單
 
 ## 8. 測試策略
@@ -200,13 +219,15 @@ application_courses_a      一般課程 A（一對多，學生手填）
 - 建立申請單：流水號遞增；`barcode` = 學號 + B 科號；A 課程 0 門 / 6 門 / 欄位空白被拒；B 停用被拒；**同學生同 B 課程第二次被拒且回傳既有 id**；同學生不同 B 課程可以；A 課程順序保留；transaction（B 無效時 A 子表不殘留）
 - 掃描：24 碼 → 唯一一筆 `printed → received`；流水號路徑仍可用；格式錯誤與查無分開回報；重複掃描不覆寫
 - 申請紀錄：`listApplicationsByStudent` 只回該學生、新→舊、含 B 課程名稱與教師
-- 課程管理：科號非 15 碼被拒；重複被拒
+- 課程管理：科號非 15 碼英數被拒；重複被拒；時間空白被拒
+- 批次匯入：Tab / 逗號分隔皆可；標題列跳過；空行跳過；欄位不足、科號格式、空白欄位、同批重複各自標紅；已存在標黃且不寫入；plan 有紅字時 apply 拒絕；apply 為 transaction 且回傳筆數；BOM 與 CRLF 正常處理
 - 條碼 SVG：內容 24 碼可產生
 - Dockerfile：`HOSTNAME=0.0.0.0`
 
 手動驗證：
 
-- 登入 → 填 3 門 A → 選 B → 列印預覽：條碼在右上、A 表格三列、一頁 A4
+- 貼上 3 行（1 正常、1 科號錯、1 已存在）→ 預覽三色正確 → 修正後匯入成功
+- 登入 → 填 3 門 A → 選 B（下拉看得到時間）→ 列印預覽：條碼在右上、A 表格三列、B 含時間、一頁 A4
 - 回 `/apply` 下半部看到剛才那筆；掃描收件後重新整理狀態變「已收件」
 - 手機掃右上角條碼讀出 24 碼；`/admin/scan` 貼上後成功登記
 - 375 / 768 / 1440 寬度無橫向捲軸
@@ -220,13 +241,14 @@ school-apply-form/
     login/page.tsx, login/LoginForm.tsx, login/actions.ts
     apply/page.tsx, apply/ApplyForm.tsx, apply/CourseARows.tsx, apply/actions.ts
     apply/[id]/page.tsx, print.css, PrintToolbar.tsx
-    admin/courses/…, admin/scan/…
+    admin/courses/page.tsx, actions.ts, AddCourseForm.tsx, ImportCoursesForm.tsx
+    admin/scan/…
   components/                 Button / Field / Badge / Card / icons / Nav
   lib/
     auth.ts                   getCurrentStudent / login / logout（SSO 替換點）
     db/schema.ts, db/client.ts
     applications.ts           createApplication / getApplication / listApplicationsByStudent / receiveByBarcode / receiveApplication
-    courses.ts, students.ts, barcode.ts, format.ts, seed.ts
+    courses.ts, course-import.ts, students.ts, barcode.ts, format.ts, seed.ts
   drizzle/                    migrations（重產）
   scripts/seed.ts
   tests/
