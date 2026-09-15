@@ -10,4 +10,8 @@ describe('renderCode128Svg', () => {
   it('不同內容產生不同 svg', () => {
     expect(renderCode128Svg('11300000111510EECS200101')).not.toBe(renderCode128Svg('11300000211510EECS200101'));
   });
+  it('內容含空格也可產生 svg', () => {
+    const svg = renderCode128Svg('11300000111510CS  110400');
+    expect(svg.startsWith('<svg')).toBe(true);
+  });
 });

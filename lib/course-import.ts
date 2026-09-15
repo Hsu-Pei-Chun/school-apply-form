@@ -1,13 +1,12 @@
 import { inArray } from 'drizzle-orm';
 import { Db } from './db/client';
 import { courses } from './db/schema';
-import { createCourse } from './courses';
+import { createCourse, COURSE_CODE_RE, COURSE_CODE_ERROR } from './courses';
 
 export type ParsedRow = { line: number; code: string; name: string; teacher: string; time: string; raw: string };
 export type PlanRow = ParsedRow & ({ status: 'add' } | { status: 'skip'; reason: string } | { status: 'error'; reason: string });
 export type ImportPlan = { rows: PlanRow[]; addCount: number; skipCount: number; errorCount: number };
 
-const CODE_RE = /^[0-9A-Za-z]{15}$/;
 export const MAX_IMPORT_LINES = 2000;
 
 function splitLine(line: string): string[] {
@@ -39,7 +38,7 @@ export function planCourseImport(db: Db, rows: ParsedRow[]): ImportPlan {
   );
   const seen = new Set<string>();
   const out: PlanRow[] = rows.map(r => {
-    if (!CODE_RE.test(r.code)) return { ...r, status: 'error', reason: '科號必須為 15 碼英數' };
+    if (!COURSE_CODE_RE.test(r.code)) return { ...r, status: 'error', reason: COURSE_CODE_ERROR };
     if (!r.name || !r.teacher || !r.time) return { ...r, status: 'error', reason: '課名、授課教師、上課時間皆必填' };
     if (seen.has(r.code)) return { ...r, status: 'error', reason: '同批內科號重複' };
     seen.add(r.code);

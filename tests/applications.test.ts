@@ -185,3 +185,14 @@ describe('receiveApplication（保留）', () => {
     expect(receiveApplication(db, 'A000001').kind).toBe('received');
   });
 });
+
+describe('科號含空格的條碼', () => {
+  const BS = '11510CS  110400';
+  it('barcode 24 碼含空格；receiveByInput 可對到', () => {
+    createCourse(db, { code: BS, name: '關鍵科技', teacher: '磨課師', time: 'Mn' });
+    const a = createApplication(db, { ...base, courseBCode: BS });
+    expect(a.barcode).toBe(SID + BS);
+    expect(a.barcode.length).toBe(24);
+    expect(receiveByInput(db, `  ${SID}${BS}  `).kind).toBe('received');
+  });
+});

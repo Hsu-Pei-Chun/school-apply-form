@@ -49,7 +49,7 @@ describe('planCourseImport', () => {
     ].join('\n'));
     const plan = planCourseImport(db, rows);
     expect(plan.rows.map(r => r.status)).toEqual(['add', 'skip', 'error', 'error', 'error']);
-    expect((plan.rows[2] as { reason: string }).reason).toBe('科號必須為 15 碼英數');
+    expect((plan.rows[2] as { reason: string }).reason).toBe('科號必須為 15 碼（英數或空格）');
     expect((plan.rows[3] as { reason: string }).reason).toBe('課名、授課教師、上課時間皆必填');
     expect((plan.rows[4] as { reason: string }).reason).toBe('同批內科號重複');
     expect(plan).toMatchObject({ addCount: 1, skipCount: 1, errorCount: 3 });
