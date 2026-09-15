@@ -59,6 +59,17 @@ describe('標題列對應', () => {
   it('標題缺必要欄位 → 整批錯誤', () => {
     expect(() => parseCourseImport('科號\t課名\t上課時間\n11510AIA 200100\tx\tM1')).toThrow('標題列缺少欄位：教師');
   });
+  it('無標題列時，即使欄位內容含「科號」二字也不誤判為標題（需與別名完全相符）', () => {
+    const rows = parseCourseImport('11510AIA 200100\t科號查詢實務\tCode Lookup\tM1M2\t王教授');
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ code: '11510AIA 200100', name: '科號查詢實務', nameEn: 'Code Lookup', time: 'M1M2', teacher: '王教授' });
+  });
+  it('標題儲存格前後含空白仍視為標題（trim 後完全相符）', () => {
+    const text = ' 科號 \t 中文課名 \t 上課時間 \t 教師 \n11510AIA 200100\t統計學\tW2W3W4\t李宗穎';
+    const rows = parseCourseImport(text);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ code: '11510AIA 200100', name: '統計學', time: 'W2W3W4', teacher: '李宗穎' });
+  });
 });
 
 describe('CSV 引號', () => {

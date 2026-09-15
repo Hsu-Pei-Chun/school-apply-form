@@ -35,7 +35,7 @@ function splitLine(line: string): string[] {
   return line.includes('\t') ? line.split('\t').map(s => s.trim()) : splitCsv(line);
 }
 function headerMap(cells: string[]): Partial<Record<Field, number>> | null {
-  if (!cells.some(c => c.includes('科號'))) return null;
+  if (!cells.some(c => HEADER_ALIASES.code.includes(c))) return null;
   const map: Partial<Record<Field, number>> = {};
   cells.forEach((c, i) => {
     for (const f of Object.keys(HEADER_ALIASES) as Field[]) {
