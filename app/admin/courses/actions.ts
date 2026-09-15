@@ -8,9 +8,10 @@ export async function addCourse(formData: FormData): Promise<{ error: string } |
   const code = String(formData.get('code') ?? '').trim();
   const name = String(formData.get('name') ?? '').trim();
   const teacher = String(formData.get('teacher') ?? '').trim();
-  if (!code || !name || !teacher) return { error: '代碼、名稱、授課教師皆必填' };
+  const time = String(formData.get('time') ?? '').trim();
+  if (!code || !name || !teacher || !time) return { error: '代碼、名稱、授課教師、上課時間皆必填' };
   try {
-    createCourse(getDb(), { code, name, teacher });
+    createCourse(getDb(), { code, name, teacher, time });
   } catch (e) {
     return { error: (e as Error).message };
   }

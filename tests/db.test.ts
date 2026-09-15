@@ -7,7 +7,7 @@ const CODE = '11510EECS200101';
 
 function fixtures(db: ReturnType<typeof createDb>) {
   db.insert(students).values({ id: SID, name: '學生一', department: '資工系 一年級' }).run();
-  db.insert(courses).values({ code: CODE, name: '數學', teacher: '王教授', createdAt: '2026-01-01' }).run();
+  db.insert(courses).values({ code: CODE, name: '數學', teacher: '王教授', time: 'M1M2', createdAt: '2026-01-01' }).run();
 }
 
 describe('createDb', () => {
@@ -26,7 +26,7 @@ describe('createDb', () => {
 
   it('courses.code 必須 15 碼', () => {
     const db = createDb(':memory:');
-    expect(() => db.insert(courses).values({ code: 'C001', name: 'x', teacher: 'y', createdAt: 'z' }).run()).toThrow();
+    expect(() => db.insert(courses).values({ code: 'C001', name: 'x', teacher: 'y', time: 'M1M2', createdAt: 'z' }).run()).toThrow();
   });
 
   it('applications.status 只允許 printed 或 received', () => {

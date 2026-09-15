@@ -18,8 +18,8 @@ let db: Db;
 beforeEach(() => {
   db = createDb(':memory:');
   db.insert(students).values({ id: SID, name: '王小明', department: '資工系 二年級' }).run();
-  createCourse(db, { code: B1, name: 'X-Class 線代', teacher: '李教授' });
-  createCourse(db, { code: B2, name: 'X-Class 機率', teacher: '張教授' });
+  createCourse(db, { code: B1, name: 'X-Class 線代', teacher: '李教授', time: 'M1M2' });
+  createCourse(db, { code: B2, name: 'X-Class 機率', teacher: '張教授', time: 'T3T4' });
 });
 
 describe('nextApplicationId', () => {
@@ -83,7 +83,7 @@ describe('createApplication', () => {
     const SID2 = '113000002';
     const B3 = '11510CS00200103';
     db.insert(students).values({ id: SID2, name: '別人', department: 'x' }).run();
-    createCourse(db, { code: B3, name: 'X-Class 統計', teacher: '吳教授' });
+    createCourse(db, { code: B3, name: 'X-Class 統計', teacher: '吳教授', time: 'W5W6' });
 
     const originalTransaction = db.transaction.bind(db);
     let raced = false;
@@ -126,6 +126,7 @@ describe('getApplication / findApplicationByBarcode', () => {
     expect(d?.studentName).toBe('王小明');
     expect(d?.courseBName).toBe('X-Class 線代');
     expect(d?.courseBTeacher).toBe('李教授');
+    expect(d?.courseBTime).toBe('M1M2');
     expect(d?.coursesA.map(c => c.name)).toEqual(['電路學', '計概']);
     expect(findApplicationByBarcode(db, SID + B1)?.id).toBe('A000001');
   });
@@ -144,6 +145,8 @@ describe('listApplicationsByStudent', () => {
     const list = listApplicationsByStudent(db, SID);
     expect(list.map(x => x.courseBCode)).toEqual([B2, B1]);
     expect(list[0].courseBName).toBe('X-Class 機率');
+    expect(list[0].courseBTime).toBe('T3T4');
+    expect(list[0].courseBTeacher).toBe('張教授');
   });
 });
 

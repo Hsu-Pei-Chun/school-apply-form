@@ -16,6 +16,7 @@ export type ApplicationDetail = Application & {
   department: string;
   courseBName: string;
   courseBTeacher: string;
+  courseBTime: string;
   coursesA: ApplicationCourseA[];
 };
 
@@ -24,6 +25,7 @@ export type ApplicationSummary = {
   courseBCode: string;
   courseBName: string;
   courseBTeacher: string;
+  courseBTime: string;
   status: Application['status'];
   createdAt: string;
   receivedAt: string | null;
@@ -123,6 +125,7 @@ function loadDetail(db: Db, where: SQL): ApplicationDetail | undefined {
       department: students.department,
       courseBName: courses.name,
       courseBTeacher: courses.teacher,
+      courseBTime: courses.time,
     })
     .from(applications)
     .innerJoin(students, eq(applications.studentId, students.id))
@@ -150,6 +153,7 @@ export function listApplicationsByStudent(db: Db, studentId: string): Applicatio
       courseBCode: applications.courseBCode,
       courseBName: courses.name,
       courseBTeacher: courses.teacher,
+      courseBTime: courses.time,
       status: applications.status,
       createdAt: applications.createdAt,
       receivedAt: applications.receivedAt,

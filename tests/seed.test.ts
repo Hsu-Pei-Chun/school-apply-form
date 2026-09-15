@@ -33,6 +33,7 @@ describe('seed', () => {
     seed(db, { ifEmpty: false });
     expect(db.select().from(students).limit(1).get()?.id).toBe('113000001');
     expect(db.select().from(courses).all().every(c => c.code.length === 15)).toBe(true);
+    expect(db.select().from(courses).all().every(c => c.time.length > 0)).toBe(true);
   });
 
   it('seed 後已有申請紀錄時，重新 seed（ifEmpty:false）不因外鍵約束拋錯，且申請相關表清空', () => {
