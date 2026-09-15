@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDb, Db } from '@/lib/db/client';
 import { createCourse, listCourses } from '@/lib/courses';
-import { parseCourseImport, planCourseImport, applyCourseImport } from '@/lib/course-import';
+import { parseCourseImport, planCourseImport, applyCourseImport, MAX_IMPORT_LINES } from '@/lib/course-import';
 
 const C1 = '11510CHEM200104';
 const C2 = '11510CHEM200114';
@@ -25,6 +25,15 @@ describe('parseCourseImport', () => {
   it('欄位會 trim；欄位不足時缺的為空字串', () => {
     const rows = parseCourseImport(` ${C1} \t 線性代數1 \t許教授`);
     expect(rows[0]).toMatchObject({ code: C1, name: '線性代數1', teacher: '許教授', time: '' });
+  });
+  it('超過 MAX_IMPORT_LINES 行時拒絕整批', () => {
+    const text = Array.from({ length: MAX_IMPORT_LINES + 1 }, () => `${C1}\t線性代數1\t許教授\tM1M2`).join('\n');
+    expect(() => parseCourseImport(text)).toThrow('一次最多匯入');
+  });
+  it('標題列偵測：跳過開頭空行後的第一個非空行（若含科號）', () => {
+    const rows = parseCourseImport(`\n科號\t課名\t授課教師\t上課時間\n${C1}\t線性代數1\t許教授\tM1M2`);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ line: 3, code: C1 });
   });
 });
 
@@ -64,5 +73,11 @@ describe('applyCourseImport', () => {
     const plan = planCourseImport(db, parseCourseImport(`${C1}\t線性代數1\t許教授\tM1M2\nC001\t壞\t王\tM1M2`));
     expect(() => applyCourseImport(db, plan)).toThrow('匯入內容有錯誤，請先修正');
     expect(listCourses(db)).toHaveLength(0);
+  });
+  it('寫入途中若科號已被併發插入則整批回滾', () => {
+    const plan = planCourseImport(db, parseCourseImport(`${C1}\t線性代數1\t許教授\tM1M2\n${C3}\t線代3\t李\tW5W6`));
+    createCourse(db, { code: C3, name: '併發插入', teacher: '陳', time: 'M1M2' });
+    expect(() => applyCourseImport(db, plan)).toThrow('課程代碼已存在');
+    expect(listCourses(db).map(c => c.code)).toEqual([C3]);
   });
 });
