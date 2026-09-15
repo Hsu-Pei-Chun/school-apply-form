@@ -32,7 +32,7 @@ export default function ApplyForm({ courses, maxCoursesA }: { courses: CourseOpt
       <Field id="courseBCode" label="X-Class 課程 B" hint="欲申請的 X-Class 課程（含上課時間），需事先與授課教師確認">
         <select id="courseBCode" name="courseBCode" className="input" required value={courseB} onChange={e => setCourseB(e.target.value)}>
           <option value="" disabled>請選擇</option>
-          {courses.map(c => <option key={c.code} value={c.code}>{c.code}　{c.name}（{c.teacher}）　{c.time}</option>)}
+          {courses.map(c => <option key={c.code} value={c.code}>{c.code.replace(/ /g, ' ')}　{c.name}（{c.teacher}）　{c.time}</option>)}
         </select>
       </Field>
 
