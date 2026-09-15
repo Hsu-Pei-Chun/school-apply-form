@@ -1,0 +1,55 @@
+科號	中文課名	英文課名	上課時間	教師
+11510AIA 200100	統計學暨實習--台大	Statistics with Recitation--NTU	W2W3W4	台大李宗穎,周瑞賢
+11510AIA 200200	基礎程式設計(C++)--陽明交大	Introduction to Programming (C++)--NYCU	M2M3M4	NYCU溫宏斌,洪仕軒
+11510AIA 400100	人工智慧導論--成大	Introduction to Artificial Intelligence--NCKU	R5R6R7	成大朱威達
+11510AIA 500100	金融科技導論--台大	Introduction to FinTech--NTU	W2W3W4	台大張智星
+11510AIA 500200	機器學習--台大	Machine Learning--NTU	W2W3W4	台大林軒田
+11510AIA 500400	智慧人機互動--北科大	Human-AI Interaction--NTUT	R5R6R7	北科大韓秉軒
+11510AIA 500500	生成式AI:文字與圖像生成的原理與實務-政大	Generative AI: Text and Image Synthesis Principles and Practice--NCCU	T7T8T9Ta	政大蔡炎龍,陳宜欣
+11510AIA 500700	實體人工智慧--陽明交大	Physical AI--NYCU	T5T6T7	NYCU陳奕廷,安凱若
+11510ASTR600700	天文物理的前沿一	Frontier of Astrophysics Seminars (I)	TnWnRn	後藤友嗣
+11510CS  110400	關鍵科技探索：人工智慧(磨課師)	Key Technology Exploration: Artificial Intelligence (MOOC)	Mn	郭柏志
+11510CS  531400	隨機演算法	Randomized Algorithms	T3T4R3	韓永楷
+11510CS  542200	平行程式	Parallel Programming	M7M8M9	周志遠
+11510CS  543400	進階高效能計算叢集電腦實務	Advanced High Performance Computing Cluster Practice	WaWbWc	周志遠
+11510CS  555300	數位醫療資料科學	Data Science for Digital Health	F2F3F4	郭柏志
+11510CS  563100	自然語言處理	Natural Language Processing	R2R3R4	高宏宇
+11510CTM 210100	E-News自媒體的多重宇宙課程	Journalism Multi-Media Program on E-News Practices	Mn	周岐原
+11510CTM 501000	跨境科技創業實作	Cross-Border Tech Entrepreneurship Practicum	M9MaMb	郭孟倫,賴怡君
+11510EC  549100	人工智慧運算架構與系統一	AI Computing Architecture and System (I)	M5M6	林偉棻
+11510EC  549200	人工智慧運算架構與系統二	AI Computing Architecture and System (II)	M7M8	林偉棻
+11510ECON309103	總體經濟學一	Macroeconomics (I)	F2F3F4	盧姝璇
+11510EE  371000	深度學習實作	Deep Learning Implementation	R5R6R7R8	石昭玲
+11510EE  441000	生醫影像導論	Introduction to Biomedical Imaging	T5T6R4	李夢麟
+11510EECS121000	Python語言程式入門	Introduction to Programming in Python	T5T6R5	周百祥
+11510ESS 223000	電子學一	Electronics I	W3W4F3F4	巫勇賢
+11510ESS 553500	材料動力學	Kinetic Process of Materials	T3T4F3F4	朱鵬維
+11510FL  100500	西洋文學概論一	Introduction to Western Literature I	T7T8T9	吳建亨
+11510FL  405400	中級西班牙語會話一	Intermediate Spanish Conversation I	WnW5W6	鄭雲英
+11510GE  144100	致命優雅: 自然界毒物之迷思、醫學與奧秘	Deadly Elegance: Myths, Medicine and Wonders of Poisons from Nature	W7W8	陳子福
+11510GE  162200	資訊素養與倫理	Information Literacy and Ethics	R3R4	區國良
+11510GEC 120200	生態體系與全球變遷	Eco-system and Global Changes	T7T8T9	游能悌
+11510ISA 581000	資料探勘與應用	Data Mining : Concepts, Techniques, and Applications	M2M3M4	陳宜欣
+11510KHCT102300	探索孩童心靈世界(I): 發展心理學(磨課師)	Into Children's Heart (I): Developmental Psychology (MOOC)	M3M4	周育如
+11510KHCT102600	探索孩童心靈世界(Ⅱ): 支持與輔導(磨課師)	Into Children's Herat (Ⅱ): Support and Guidance (MOOC)	M5M6	周育如
+11510KSPE110200	早期介入概論	Introduction to Early Intervention	M5M6R5	陳力綺
+11510LANG500002	科技論文解密：從閱讀學寫作(磨課師)	Deconstructing Research Articles(MOOC)	M5	黃芸茵
+11510LSBS515300	藥與毒：迷思和事實	Medicines and Poisons: Myths and Facts	W3W4	陳子福
+11510MATH102000	微積分Ａ二	Calculus (II)	T3T4R3R4	廖軒毅
+11510MATH201001	高等微積分一	Advanced Calculus I	T1T2F1F2	廖軒毅
+11510MATH541000	近世代數一	Modern Algebra I	M5M6T5	張介玉
+11510MATH688000	離散動力系統	Discrete Dynamical Systems	W2W3W4	戴佳原
+11510MS  413100	生醫材料	Biomedical Materials	F2F3F4	王子威
+11510NES 523000	輻射生物學	Radiation Biology	R5R6R7	陳芳馨
+11510NES 525200	醫學影像物理學	Medical Imaging Physics	M2M3M4	蔡惠予,林曉均
+11510NES 525700	臨床質子放射治療實務	Practical Proton Beam Therapy	R3R4Rn	陳俊丞
+11510NES 541000	反應器工程	Nuclear Reactor Engineering	W3W4F3F4	陳紹文
+11510NES 563000	材料輻射損傷	Radiation Damage in Materials	T5T6F5F6	藍貫哲
+11510PHYS116000	普通物理二(物理系)	General Physics (II)	T1T2F1F2	後藤友嗣
+11510PHYS231000	電磁學一	Electromagnetism I	T3T4R3R4	林晏詳
+11510PHYS332000	光學一	Optics	T4R3R4	王立邦
+11510PHYS571000	凝態物理一	Condensed Matter Physics I	MnM5M6	黃一平
+11510PME 400500	數值分析	Numerical Analysis	T2T3T4	陳玉彬
+11510PME 402100	近代物理導論	Introduction to Modern Physics	R6R7R8	賴梅鳳
+11510PME 665000	熱輻射	Radiative Heat Transfer	F2F3F4	陳玉彬
+11510THC 105800	心靈迷宮大挑戰：破解心理成長謎題(磨課師)	Mind maze challenge: Unraveling the mysteries of psychological growth(MOOC)	Sc	王道維
