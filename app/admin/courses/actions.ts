@@ -26,14 +26,18 @@ export async function toggleCourse(formData: FormData) {
   revalidatePath('/admin/courses');
 }
 
-export async function previewImport(text: string): Promise<ImportPlan> {
-  return planCourseImport(getDb(), parseCourseImport(String(text ?? '')));
+export async function previewImport(text: string): Promise<ImportPlan | { error: string }> {
+  try {
+    return planCourseImport(getDb(), parseCourseImport(String(text ?? '')));
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 }
 
 export async function confirmImport(text: string): Promise<{ imported: number } | { error: string }> {
   const db = getDb();
-  const plan = planCourseImport(db, parseCourseImport(String(text ?? '')));
   try {
+    const plan = planCourseImport(db, parseCourseImport(String(text ?? '')));
     const imported = applyCourseImport(db, plan);
     revalidatePath('/admin/courses');
     revalidatePath('/apply');

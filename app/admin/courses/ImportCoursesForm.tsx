@@ -8,7 +8,7 @@ import type { ImportPlan, PlanRow } from '@/lib/course-import';
 import { previewImport, confirmImport } from './actions';
 
 const TONE: Record<PlanRow['status'], 'success' | 'warning' | 'danger'> = { add: 'success', skip: 'warning', error: 'danger' };
-const LABEL: Record<PlanRow['status'], string> = { add: '新增', skip: '略過', error: '錯誤' };
+const LABEL: Record<PlanRow['status'], string> = { add: '新增', skip: '已存在，略過', error: '錯誤' };
 
 export default function ImportCoursesForm() {
   const [text, setText] = useState('');
@@ -23,11 +23,16 @@ export default function ImportCoursesForm() {
     setText(await f.text());
     setPlan(null);
     setMessage(null);
+    e.target.value = '';
   }
 
   function onPreview() {
     setMessage(null);
-    startTransition(async () => { setPlan(await previewImport(text)); });
+    startTransition(async () => {
+      const r = await previewImport(text);
+      if ('error' in r) { setMessage({ kind: 'error', text: r.error }); setPlan(null); return; }
+      setPlan(r);
+    });
   }
 
   function onConfirm() {
@@ -47,7 +52,7 @@ export default function ImportCoursesForm() {
         <textarea id="import-text" className="input min-h-40 font-mono text-sm" value={text}
           onChange={e => { setText(e.target.value); setPlan(null); setMessage(null); }}
           placeholder={'11510CHEM200104\t線性代數1\t許教授\tM1M2'} />
-        <p className="text-sm text-muted-fg">Tab 或逗號分隔皆可；第一行若為標題會自動略過。</p>
+        <p className="text-sm text-muted-fg">Tab 或逗號分隔皆可；第一行若為標題會自動略過；CSV 請以 UTF-8 儲存。</p>
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="import-file" className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface px-4 text-sm hover:bg-background">
@@ -73,7 +78,11 @@ export default function ImportCoursesForm() {
         <p role="alert" className="text-sm text-danger">有 {plan.errorCount} 行錯誤，請修正後重新預覽。</p>
       )}
 
-      {plan && (
+      {plan && plan.rows.length === 0 && (
+        <p className="text-sm text-muted-fg">沒有可解析的資料。</p>
+      )}
+
+      {plan && plan.rows.length > 0 && (
         <div className="overflow-x-auto rounded-[var(--radius-card)] border border-border">
           <table className="w-full text-sm">
             <thead className="bg-background text-left text-muted-fg">
