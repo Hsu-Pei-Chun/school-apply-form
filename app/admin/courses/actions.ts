@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getDb } from '@/lib/db/client';
 import { createCourse, setCourseActive } from '@/lib/courses';
+import { parseCourseImport, planCourseImport, applyCourseImport, ImportPlan } from '@/lib/course-import';
 
 export async function addCourse(formData: FormData): Promise<{ error: string } | void> {
   const code = String(formData.get('code') ?? '').trim();
@@ -23,4 +24,21 @@ export async function toggleCourse(formData: FormData) {
   const isActive = formData.get('isActive') === '1';
   setCourseActive(getDb(), code, !isActive);
   revalidatePath('/admin/courses');
+}
+
+export async function previewImport(text: string): Promise<ImportPlan> {
+  return planCourseImport(getDb(), parseCourseImport(String(text ?? '')));
+}
+
+export async function confirmImport(text: string): Promise<{ imported: number } | { error: string }> {
+  const db = getDb();
+  const plan = planCourseImport(db, parseCourseImport(String(text ?? '')));
+  try {
+    const imported = applyCourseImport(db, plan);
+    revalidatePath('/admin/courses');
+    revalidatePath('/apply');
+    return { imported };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 }
