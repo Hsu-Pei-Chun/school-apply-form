@@ -149,5 +149,6 @@ describe('校方真實檔案', () => {
     expect(plan.rows.find(r => r.code === '11510CS  110400')).toBeTruthy();
     expect(applyCourseImport(db, plan)).toBe(54);
     expect(listCourses(db).find(c => c.code === '11510AIA 200100')?.teacher).toBe('台大李宗穎,周瑞賢');
+    expect(listCourses(db).find(c => c.code === '11510AIA 200100')?.nameEn).toBe('Statistics with Recitation--NTU');
   });
 });

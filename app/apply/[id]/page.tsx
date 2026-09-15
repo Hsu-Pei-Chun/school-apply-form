@@ -53,7 +53,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
             </thead>
             <tbody>
               {a.coursesA.map(c => (
-                <tr key={c.seq}><td>{c.seq}</td><td>{c.code}</td><td>{c.name}</td><td>{c.time}</td><td>{c.teacher}</td></tr>
+                <tr key={c.seq}><td>{c.seq}</td><td className="code">{c.code}</td><td>{c.name}</td><td>{c.time}</td><td>{c.teacher}</td></tr>
               ))}
             </tbody>
           </table>

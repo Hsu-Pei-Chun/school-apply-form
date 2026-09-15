@@ -51,6 +51,11 @@ describe('courses', () => {
     expect(listCourses(db)[0].nameEn).toBe('Key Technology');
   });
 
+  it('科號首尾空格拋錯', () => {
+    expect(() => createCourse(db, { code: ' 1510CS  110400', name: 'x', teacher: 'y', time: 'M1M2' })).toThrow('科號必須為 15 碼（英數或空格）');
+    expect(() => createCourse(db, { code: '11510CS  11040 ', name: 'x', teacher: 'y', time: 'M1M2' })).toThrow('科號必須為 15 碼（英數或空格）');
+  });
+
   it('上課時間空白拋錯', () => {
     expect(() => createCourse(db, { code: '11510EECS200101', name: '微積分', teacher: '王教授', time: '  ' })).toThrow('上課時間為必填');
   });

@@ -10,7 +10,7 @@ export function listActiveCourses(db: Db): Course[] {
   return db.select().from(courses).where(eq(courses.isActive, 1)).orderBy(asc(courses.code)).all();
 }
 
-export const COURSE_CODE_RE = /^[0-9A-Za-z ]{15}$/;
+export const COURSE_CODE_RE = /^(?! )[0-9A-Za-z ]{15}(?<! )$/;
 export const COURSE_CODE_ERROR = '科號必須為 15 碼（英數或空格）';
 
 export function createCourse(db: Db, input: { code: string; name: string; teacher: string; time: string; nameEn?: string }): Course {
