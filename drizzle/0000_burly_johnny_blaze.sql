@@ -31,6 +31,7 @@ CREATE TABLE `courses` (
 	`code` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`teacher` text NOT NULL,
+	`time` text NOT NULL,
 	`is_active` integer DEFAULT 1 NOT NULL,
 	`created_at` text NOT NULL,
 	CONSTRAINT "courses_code_len" CHECK(length("courses"."code") = 15)

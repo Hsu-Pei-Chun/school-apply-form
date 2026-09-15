@@ -7,7 +7,7 @@ import Field from '@/components/Field';
 import CourseARows, { CourseARow } from './CourseARows';
 import { submitApplication } from './actions';
 
-type CourseOption = { code: string; name: string; teacher: string };
+type CourseOption = { code: string; name: string; teacher: string; time: string };
 
 export default function ApplyForm({ courses, maxCoursesA }: { courses: CourseOption[]; maxCoursesA: number }) {
   const [rows, setRows] = useState<CourseARow[]>([{ key: 1, code: '', name: '', time: '', teacher: '' }]);
@@ -29,10 +29,10 @@ export default function ApplyForm({ courses, maxCoursesA }: { courses: CourseOpt
     <form action={onSubmit} className="flex flex-col gap-6">
       <CourseARows rows={rows} max={maxCoursesA} onChange={setRows} />
 
-      <Field id="courseBCode" label="X-Class 課程 B" hint="欲申請的 X-Class 課程，需事先與授課教師確認">
+      <Field id="courseBCode" label="X-Class 課程 B" hint="欲申請的 X-Class 課程（含上課時間），需事先與授課教師確認">
         <select id="courseBCode" name="courseBCode" className="input" required value={courseB} onChange={e => setCourseB(e.target.value)}>
           <option value="" disabled>請選擇</option>
-          {courses.map(c => <option key={c.code} value={c.code}>{c.code}　{c.name}（{c.teacher}）</option>)}
+          {courses.map(c => <option key={c.code} value={c.code}>{c.code}　{c.name}（{c.teacher}）　{c.time}</option>)}
         </select>
       </Field>
 

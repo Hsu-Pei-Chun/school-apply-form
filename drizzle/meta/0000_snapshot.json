@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "45e70e05-ca37-41c9-b0e1-fd229243a5d7",
+  "id": "d50dff52-5b0e-45e0-b7d0-8ed9e4d06b3c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "application_courses_a": {
@@ -224,6 +224,13 @@
         },
         "teacher": {
           "name": "teacher",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "time": {
+          "name": "time",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

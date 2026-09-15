@@ -63,8 +63,8 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
           <h2>三、X-Class 課程（Course B）</h2>
           <table>
             <tbody>
-              <tr><th>科號</th><td>{a.courseBCode}</td><th>授課教師</th><td>{a.courseBTeacher}</td></tr>
-              <tr><th>課程名稱</th><td colSpan={3}>{a.courseBName}</td></tr>
+              <tr><th>科號</th><td>{a.courseBCode}</td><th>上課時間</th><td>{a.courseBTime}</td></tr>
+              <tr><th>課程名稱</th><td>{a.courseBName}</td><th>授課教師</th><td>{a.courseBTeacher}</td></tr>
             </tbody>
           </table>
         </section>

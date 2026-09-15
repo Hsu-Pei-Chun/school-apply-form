@@ -18,6 +18,7 @@ export const courses = sqliteTable(
     code: text('code').primaryKey(),
     name: text('name').notNull(),
     teacher: text('teacher').notNull(),
+    time: text('time').notNull(),
     isActive: integer('is_active').notNull().default(1),
     createdAt: text('created_at').notNull(),
   },
