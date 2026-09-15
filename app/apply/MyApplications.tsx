@@ -13,6 +13,7 @@ export default function MyApplications({ items }: { items: ApplicationSummary[] 
             <th className="px-3 py-2 font-semibold">X-Class 科號</th>
             <th className="px-3 py-2 font-semibold">課名</th>
             <th className="px-3 py-2 font-semibold">授課教師</th>
+            <th className="px-3 py-2 font-semibold">上課時間</th>
             <th className="px-3 py-2 font-semibold">申請日期</th>
             <th className="px-3 py-2 font-semibold">狀態</th>
             <th className="px-3 py-2" />
@@ -24,6 +25,7 @@ export default function MyApplications({ items }: { items: ApplicationSummary[] 
               <td className="px-3 py-2 font-mono">{a.courseBCode}</td>
               <td className="px-3 py-2">{a.courseBName}</td>
               <td className="px-3 py-2">{a.courseBTeacher}</td>
+              <td className="px-3 py-2 font-mono">{a.courseBTime}</td>
               <td className="px-3 py-2 whitespace-nowrap">{formatDate(a.createdAt)}</td>
               <td className="px-3 py-2">
                 {a.status === 'received' ? <Badge tone="success">已收件</Badge> : <Badge tone="neutral">已產生</Badge>}

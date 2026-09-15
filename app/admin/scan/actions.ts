@@ -8,7 +8,7 @@ export type ScanOutcome =
       kind: 'received' | 'already';
       id: string; barcode: string; studentId: string; studentName: string; department: string;
       coursesA: { seq: number; code: string; name: string }[];
-      courseBCode: string; courseBName: string; courseBTeacher: string; receivedAt: string;
+      courseBCode: string; courseBName: string; courseBTeacher: string; courseBTime: string; receivedAt: string;
     }
   | { kind: 'not_found'; input: string }
   | { kind: 'bad_format'; input: string };
@@ -22,7 +22,7 @@ export async function scan(raw: string): Promise<ScanOutcome> {
     kind: r.kind,
     id: d.id, barcode: d.barcode, studentId: d.studentId, studentName: d.studentName, department: d.department,
     coursesA: d.coursesA.map(c => ({ seq: c.seq, code: c.code, name: c.name })),
-    courseBCode: d.courseBCode, courseBName: d.courseBName, courseBTeacher: d.courseBTeacher,
+    courseBCode: d.courseBCode, courseBName: d.courseBName, courseBTeacher: d.courseBTeacher, courseBTime: d.courseBTime,
     receivedAt: d.receivedAt ?? '',
   };
 }

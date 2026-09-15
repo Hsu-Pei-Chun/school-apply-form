@@ -14,7 +14,7 @@ export default async function ApplyPage() {
   if (!student) redirect('/login?next=/apply');
 
   const db = getDb();
-  const courses = listActiveCourses(db).map(c => ({ code: c.code, name: c.name, teacher: c.teacher }));
+  const courses = listActiveCourses(db).map(c => ({ code: c.code, name: c.name, teacher: c.teacher, time: c.time }));
   const mine = listApplicationsByStudent(db, student.id);
 
   return (

@@ -61,7 +61,7 @@ export default function ScanForm() {
               <dt className="text-muted-fg">學生</dt><dd>{current.studentId}　{current.studentName}　{current.department}</dd>
               <dt className="text-muted-fg">一般課程 A</dt>
               <dd><ul>{current.coursesA.map(c => <li key={c.seq}>{c.seq}. {c.code}　{c.name}</li>)}</ul></dd>
-              <dt className="text-muted-fg">X-Class B</dt><dd>{current.courseBCode}　{current.courseBName}（{current.courseBTeacher}）</dd>
+              <dt className="text-muted-fg">X-Class B</dt><dd>{current.courseBCode}　{current.courseBName}（{current.courseBTeacher}）　{current.courseBTime}</dd>
               <dt className="text-muted-fg">申請單號</dt><dd className="font-mono">{current.id}</dd>
               {current.kind === 'already' && (<><dt className="text-muted-fg">原收件時間</dt><dd>{formatDateTime(current.receivedAt)}</dd></>)}
             </dl>
