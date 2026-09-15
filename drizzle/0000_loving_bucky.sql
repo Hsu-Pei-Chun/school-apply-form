@@ -30,6 +30,7 @@ CREATE UNIQUE INDEX `applications_student_course_uq` ON `applications` (`student
 CREATE TABLE `courses` (
 	`code` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
+	`name_en` text DEFAULT '' NOT NULL,
 	`teacher` text NOT NULL,
 	`time` text NOT NULL,
 	`is_active` integer DEFAULT 1 NOT NULL,

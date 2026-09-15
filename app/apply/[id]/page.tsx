@@ -31,7 +31,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
           </div>
           <div className="barcode" role="img" aria-label={`條碼 ${a.barcode}`}>
             <div dangerouslySetInnerHTML={{ __html: svg }} />
-            <div className="human">{a.barcode}</div>
+            <div className="human code">{a.barcode}</div>
           </div>
         </div>
 
@@ -53,7 +53,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
             </thead>
             <tbody>
               {a.coursesA.map(c => (
-                <tr key={c.seq}><td>{c.seq}</td><td>{c.code}</td><td>{c.name}</td><td>{c.time}</td><td>{c.teacher}</td></tr>
+                <tr key={c.seq}><td>{c.seq}</td><td className="code">{c.code}</td><td>{c.name}</td><td>{c.time}</td><td>{c.teacher}</td></tr>
               ))}
             </tbody>
           </table>
@@ -63,7 +63,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
           <h2>三、X-Class 課程（Course B）</h2>
           <table>
             <tbody>
-              <tr><th>科號</th><td>{a.courseBCode}</td><th>上課時間</th><td>{a.courseBTime}</td></tr>
+              <tr><th>科號</th><td className="code">{a.courseBCode}</td><th>上課時間</th><td>{a.courseBTime}</td></tr>
               <tr><th>課程名稱</th><td>{a.courseBName}</td><th>授課教師</th><td>{a.courseBTeacher}</td></tr>
             </tbody>
           </table>

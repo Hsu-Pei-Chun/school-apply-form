@@ -8,7 +8,7 @@ const GIVEN = ['小明', '小華', '雅婷', '志偉', '淑芬', '俊傑', '怡�
 const DEPARTMENTS = ['資工系', '電機系', '數學系', '物理系', '化學系', '經濟系', '中文系', '外語系', '生科系', '材料系'];
 const GRADES = ['一年級', '二年級', '三年級', '四年級'];
 const COURSE_BASES = ['微積分', '普通物理', '計算機概論', '線性代數', '普通化學', '經濟學原理', '英文寫作', '資料結構', '統計學', '生命科學導論'];
-const DEPT_CODES = ['EECS', 'MATH', 'PHYS', 'CHEM', 'ECON', 'CHIN', 'LANG', 'LIFE', 'MSE0', 'CS00'];
+const DEPT_CODES = ['EECS', 'MATH', 'PHYS', 'CHEM', 'ECON', 'CHIN', 'LANG', 'LIFE', 'MSE0', 'CS  '];
 const TIMES = ['M1M2', 'T3T4', 'W5W6', 'R7R8', 'F1F2', 'M3M4R3R4'];
 
 function pick<T>(arr: T[], i: number): T { return arr[i % arr.length]; }
@@ -44,6 +44,7 @@ export function seed(db: Db, { ifEmpty }: { ifEmpty: boolean }): 'seeded' | 'ski
       createCourse(tx, {
         code: '11510' + pick(DEPT_CODES, i - 1) + String(200100 + i).padStart(6, '0'),
         name: `${pick(COURSE_BASES, i - 1)}${Math.ceil(i / 10)}`,
+        nameEn: `Course ${i}`,
         teacher: `${pick(SURNAMES, i * 3)}教授`,
         time: pick(TIMES, i - 1),
       });

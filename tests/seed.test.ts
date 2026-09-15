@@ -36,6 +36,12 @@ describe('seed', () => {
     expect(db.select().from(courses).all().every(c => c.time.length > 0)).toBe(true);
   });
 
+  it('科號含校方補位空格', () => {
+    const db = createDb(':memory:');
+    seed(db, { ifEmpty: false });
+    expect(db.select().from(courses).all().some(c => c.code.includes(' '))).toBe(true);
+  });
+
   it('seed 後已有申請紀錄時，重新 seed（ifEmpty:false）不因外鍵約束拋錯，且申請相關表清空', () => {
     const db = createDb(':memory:');
     seed(db, { ifEmpty: true });

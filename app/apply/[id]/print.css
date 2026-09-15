@@ -25,6 +25,7 @@ main:has(> .print-wrap) { max-width: none; }
 .sheet h2 { font-size: 12pt; font-weight: 700; margin-bottom: 2mm; }
 .sheet table { width: 100%; border-collapse: collapse; }
 .sheet th, .sheet td { border: 1px solid #000; padding: 2mm 3mm; text-align: left; vertical-align: middle; }
+.sheet .code, .barcode .human { white-space: pre; }
 .sheet th { width: 22%; background: #f1f5f9; font-weight: 600; }
 .courses-a th { width: auto; }
 .courses-a th:first-child, .courses-a td:first-child { width: 8mm; text-align: center; }

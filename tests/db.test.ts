@@ -29,6 +29,18 @@ describe('createDb', () => {
     expect(() => db.insert(courses).values({ code: 'C001', name: 'x', teacher: 'y', time: 'M1M2', createdAt: 'z' }).run()).toThrow();
   });
 
+  it('courses insert 不必給 nameEn（有 default）', () => {
+    const db = createDb(':memory:');
+    db.insert(courses).values({ code: CODE, name: 'x', teacher: 'y', time: 'M1M2', createdAt: 'z' }).run();
+    expect(db.select().from(courses).all()[0].nameEn).toBe('');
+  });
+
+  it('courses.code 可含空格補位', () => {
+    const db = createDb(':memory:');
+    db.insert(courses).values({ code: '11510CS  110400', name: 'x', teacher: 'y', time: 'M1M2', createdAt: 'z' }).run();
+    expect(db.select().from(courses).all()[0].code).toBe('11510CS  110400');
+  });
+
   it('applications.status 只允許 printed 或 received', () => {
     const db = createDb(':memory:');
     fixtures(db);

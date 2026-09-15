@@ -48,11 +48,11 @@ export default function ImportCoursesForm() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="import-text" className="text-sm font-medium">貼上 Excel 內容（每行一科：科號 ⇥ 課名 ⇥ 授課教師 ⇥ 上課時間）</label>
+        <label htmlFor="import-text" className="text-sm font-medium">貼上 Excel 內容</label>
         <textarea id="import-text" className="input min-h-40 font-mono text-sm" value={text}
           onChange={e => { setText(e.target.value); setPlan(null); setMessage(null); }}
-          placeholder={'11510CHEM200104\t線性代數1\t許教授\tM1M2'} />
-        <p className="text-sm text-muted-fg">Tab 或逗號分隔皆可；第一行若為標題會自動略過；CSV 請以 UTF-8 儲存。</p>
+          placeholder={'科號\t中文課名\t英文課名\t上課時間\t教師'} />
+        <p className="text-sm text-muted-fg">第一行請為標題列（科號、中文課名、英文課名、上課時間、教師，順序不限）；Tab 或逗號分隔皆可；CSV 請以 UTF-8 儲存。</p>
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="import-file" className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface px-4 text-sm hover:bg-background">
@@ -90,6 +90,7 @@ export default function ImportCoursesForm() {
                 <th className="px-3 py-2 font-semibold">行</th>
                 <th className="px-3 py-2 font-semibold">科號</th>
                 <th className="px-3 py-2 font-semibold">課名</th>
+                <th className="px-3 py-2 font-semibold">英文課名</th>
                 <th className="px-3 py-2 font-semibold">教師</th>
                 <th className="px-3 py-2 font-semibold">時間</th>
                 <th className="px-3 py-2 font-semibold">結果</th>
@@ -99,8 +100,9 @@ export default function ImportCoursesForm() {
               {plan.rows.map(r => (
                 <tr key={r.line} className="border-t border-border even:bg-background/60">
                   <td className="px-3 py-2 text-muted-fg">{r.line}</td>
-                  <td className="px-3 py-2 font-mono">{r.code}</td>
+                  <td className="px-3 py-2 whitespace-pre font-mono">{r.code}</td>
                   <td className="px-3 py-2">{r.name}</td>
+                  <td className="px-3 py-2">{r.nameEn}</td>
                   <td className="px-3 py-2">{r.teacher}</td>
                   <td className="px-3 py-2 font-mono">{r.time}</td>
                   <td className="px-3 py-2">

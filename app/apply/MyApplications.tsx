@@ -22,7 +22,7 @@ export default function MyApplications({ items }: { items: ApplicationSummary[] 
         <tbody>
           {items.map(a => (
             <tr key={a.id} className="border-t border-border even:bg-background/60">
-              <td className="px-3 py-2 font-mono">{a.courseBCode}</td>
+              <td className="px-3 py-2 font-mono whitespace-pre">{a.courseBCode}</td>
               <td className="px-3 py-2">{a.courseBName}</td>
               <td className="px-3 py-2">{a.courseBTeacher}</td>
               <td className="px-3 py-2 font-mono">{a.courseBTime}</td>

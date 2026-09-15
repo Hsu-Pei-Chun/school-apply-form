@@ -41,7 +41,7 @@ export class DuplicateApplicationError extends Error {
 export const MAX_COURSES_A = 5;
 export const BARCODE_LENGTH = 24;
 const SERIAL_RE = /^A\d{6}$/;
-const BARCODE_RE = /^[0-9A-Za-z]{24}$/;
+const BARCODE_RE = /^[0-9A-Za-z ]{24}$/;
 
 export function nextApplicationId(db: Db): string {
   const last = db.select({ id: applications.id }).from(applications).orderBy(desc(applications.id)).limit(1).get();

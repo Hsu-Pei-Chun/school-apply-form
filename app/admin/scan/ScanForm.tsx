@@ -55,13 +55,13 @@ export default function ScanForm() {
             {current.kind === 'received' ? <CheckIcon className="size-7" /> : <XIcon className="size-7" />}
             {STYLE[current.kind].title}
           </div>
-          <p className="mt-2 font-mono text-lg">{label(current)}</p>
+          <p className="mt-2 font-mono text-lg whitespace-pre">{label(current)}</p>
           {(current.kind === 'received' || current.kind === 'already') && (
             <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-base text-foreground">
               <dt className="text-muted-fg">學生</dt><dd>{current.studentId}　{current.studentName}　{current.department}</dd>
               <dt className="text-muted-fg">一般課程 A</dt>
-              <dd><ul>{current.coursesA.map(c => <li key={c.seq}>{c.seq}. {c.code}　{c.name}</li>)}</ul></dd>
-              <dt className="text-muted-fg">X-Class B</dt><dd>{current.courseBCode}　{current.courseBName}（{current.courseBTeacher}）　{current.courseBTime}</dd>
+              <dd><ul>{current.coursesA.map(c => <li key={c.seq}>{c.seq}. <span className="whitespace-pre">{c.code}</span>　{c.name}</li>)}</ul></dd>
+              <dt className="text-muted-fg">X-Class B</dt><dd><span className="whitespace-pre">{current.courseBCode}</span>　{current.courseBName}（{current.courseBTeacher}）　{current.courseBTime}</dd>
               <dt className="text-muted-fg">申請單號</dt><dd className="font-mono">{current.id}</dd>
               {current.kind === 'already' && (<><dt className="text-muted-fg">原收件時間</dt><dd>{formatDateTime(current.receivedAt)}</dd></>)}
             </dl>
@@ -75,7 +75,7 @@ export default function ScanForm() {
           <ul className="divide-y divide-border rounded-[var(--radius-card)] border border-border bg-surface text-sm">
             {history.map(h => (
               <li key={h.at} className="flex items-center justify-between gap-3 px-4 py-2">
-                <span className="font-mono">{label(h)}</span>
+                <span className="font-mono whitespace-pre">{label(h)}</span>
                 <span className="flex-1 truncate text-muted-fg">{h.kind === 'received' || h.kind === 'already' ? `${h.studentId} ${h.studentName}` : '—'}</span>
                 <span className={STYLE[h.kind].text}>{STYLE[h.kind].title}</span>
                 <span className="text-muted-fg">{formatDateTime(h.at).slice(11)}</span>

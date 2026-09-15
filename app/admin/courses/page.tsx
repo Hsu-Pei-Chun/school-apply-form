@@ -28,6 +28,7 @@ export default function CoursesPage() {
             <tr>
               <th className="px-4 py-3 font-semibold">代碼</th>
               <th className="px-4 py-3 font-semibold">名稱</th>
+              <th className="px-4 py-3 font-semibold">英文課名</th>
               <th className="px-4 py-3 font-semibold">教師</th>
               <th className="px-4 py-3 font-semibold">時間</th>
               <th className="px-4 py-3 font-semibold">狀態</th>
@@ -38,8 +39,9 @@ export default function CoursesPage() {
           <tbody>
             {rows.map(c => (
               <tr key={c.code} className={`border-t border-border even:bg-background/60 ${c.isActive ? '' : 'text-muted-fg'}`}>
-                <td className="px-4 py-2 font-mono">{c.code}</td>
+                <td className="px-4 py-2 whitespace-pre font-mono">{c.code}</td>
                 <td className="px-4 py-2">{c.name}</td>
+                <td className="px-4 py-2">{c.nameEn}</td>
                 <td className="px-4 py-2">{c.teacher}</td>
                 <td className="px-4 py-2 font-mono">{c.time}</td>
                 <td className="px-4 py-2"><Badge tone={c.isActive ? 'success' : 'neutral'}>{c.isActive ? '啟用' : '停用'}</Badge></td>
