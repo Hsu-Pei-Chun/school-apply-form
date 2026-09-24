@@ -1,19 +1,23 @@
 import { redirect } from 'next/navigation';
 import Card from '@/components/Card';
-import { getCurrentStudent } from '@/lib/auth';
-import { safeNext } from '@/lib/auth-core';
+import { isAdmin, isAdminConfigured } from '@/lib/admin-auth';
+import { safeNext } from '@/lib/admin-auth-core';
 import LoginForm from './LoginForm';
 
 export const dynamic = 'force-dynamic';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next = '/apply' } = await searchParams;
-  if (await getCurrentStudent()) redirect(safeNext(next));
+  const next = safeNext((await searchParams).next);
+  if (await isAdmin()) redirect(next);
   return (
     <>
-      <h1 className="mb-1 text-2xl font-semibold">學生登入</h1>
-      <p className="mb-6 text-muted-fg">登入後即可申請 X-Class 課程並查看申請紀錄。</p>
-      <Card><LoginForm next={next} /></Card>
+      <h1 className="mb-1 text-2xl font-semibold">管理員登入</h1>
+      <p className="mb-6 text-muted-fg">課程管理僅限課務組使用，請輸入管理員密碼。</p>
+      <Card>
+        {isAdminConfigured()
+          ? <LoginForm next={next} />
+          : <p role="alert" className="text-sm text-danger">系統尚未設定管理員密碼（環境變數 ADMIN_PASSWORD），請聯絡系統管理者。</p>}
+      </Card>
     </>
   );
 }

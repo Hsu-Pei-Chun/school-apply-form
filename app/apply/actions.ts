@@ -2,7 +2,6 @@
 
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/db/client';
-import { getCurrentStudent, logout } from '@/lib/auth';
 import { createApplication, DuplicateApplicationError, MAX_COURSES_A, CourseAInput } from '@/lib/applications';
 
 function parseCoursesA(formData: FormData): CourseAInput[] {
@@ -19,18 +18,16 @@ function parseCoursesA(formData: FormData): CourseAInput[] {
 }
 
 export async function submitApplication(formData: FormData): Promise<{ error: string; existingId?: string } | void> {
-  const student = await getCurrentStudent();
-  if (!student) {
-    await logout();
-    redirect('/login?next=/apply');
-  }
-
+  const field = (name: string) => String(formData.get(name) ?? '');
   let id: string;
   try {
     id = createApplication(getDb(), {
-      studentId: student.id,
+      studentId: field('studentId'),
+      studentName: field('studentName'),
+      department: field('department'),
+      degree: field('degree'),
       coursesA: parseCoursesA(formData),
-      courseBCode: String(formData.get('courseBCode') ?? ''),
+      courseBCode: field('courseBCode'),
     }).id;
   } catch (e) {
     if (e instanceof DuplicateApplicationError) return { error: e.message, existingId: e.existingId };

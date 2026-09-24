@@ -1,17 +1,16 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { login, logout } from '@/lib/auth';
-import { safeNext } from '@/lib/auth-core';
+import { loginAdmin, logoutAdmin } from '@/lib/admin-auth';
+import { safeNext } from '@/lib/admin-auth-core';
 
 export async function loginAction(formData: FormData): Promise<{ error: string } | void> {
-  const studentId = String(formData.get('studentId') ?? '').trim();
-  const s = await login(studentId);
-  if (!s) return { error: '查無此學號' };
+  const ok = await loginAdmin(String(formData.get('password') ?? ''));
+  if (!ok) return { error: '密碼錯誤' };
   redirect(safeNext(formData.get('next')));
 }
 
 export async function logoutAction(): Promise<void> {
-  await logout();
-  redirect('/login');
+  await logoutAdmin();
+  redirect('/');
 }

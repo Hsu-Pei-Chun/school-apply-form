@@ -51,8 +51,8 @@ export default function ImportCoursesForm() {
         <label htmlFor="import-text" className="text-sm font-medium">貼上 Excel 內容</label>
         <textarea id="import-text" className="input min-h-40 font-mono text-sm" value={text}
           onChange={e => { setText(e.target.value); setPlan(null); setMessage(null); }}
-          placeholder={'科號\t中文課名\t英文課名\t上課時間\t教師'} />
-        <p className="text-sm text-muted-fg">第一行請為標題列（科號、中文課名、英文課名、上課時間、教師，順序不限）；Tab 或逗號分隔皆可；CSV 請以 UTF-8 儲存。</p>
+          placeholder={'科號\t中文課名\t英文課名\t上課時間\t教師\t備註'} />
+        <p className="text-sm text-muted-fg">第一行請為標題列（科號、中文課名、英文課名、上課時間、教師、備註，順序不限；英文課名、備註可省略）；Tab 或逗號分隔皆可；CSV 請以 UTF-8 儲存。</p>
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="import-file" className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface px-4 text-sm hover:bg-background">
@@ -93,6 +93,7 @@ export default function ImportCoursesForm() {
                 <th className="px-3 py-2 font-semibold">英文課名</th>
                 <th className="px-3 py-2 font-semibold">教師</th>
                 <th className="px-3 py-2 font-semibold">時間</th>
+                <th className="px-3 py-2 font-semibold">備註</th>
                 <th className="px-3 py-2 font-semibold">結果</th>
               </tr>
             </thead>
@@ -105,6 +106,7 @@ export default function ImportCoursesForm() {
                   <td className="px-3 py-2">{r.nameEn}</td>
                   <td className="px-3 py-2">{r.teacher}</td>
                   <td className="px-3 py-2 font-mono">{r.time}</td>
+                  <td className="px-3 py-2">{r.note}</td>
                   <td className="px-3 py-2">
                     <Badge tone={TONE[r.status]}>{LABEL[r.status]}</Badge>
                     {r.status !== 'add' && <span className="ml-2 text-muted-fg">{r.reason}</span>}

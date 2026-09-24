@@ -7,12 +7,9 @@ import { logoutAction } from '@/app/login/actions';
 const LINKS = [
   { href: '/apply', label: '學生申請' },
   { href: '/admin/courses', label: '課程管理' },
-  { href: '/admin/scan', label: '掃描收件' },
 ];
 
-export type NavUser = { id: string; name: string } | null;
-
-export default function Nav({ user }: { user: NavUser }) {
+export default function Nav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   return (
     <header className="bg-primary text-white">
@@ -28,13 +25,11 @@ export default function Nav({ user }: { user: NavUser }) {
               </Link>
             );
           })}
-          {user ? (
+          {isAdmin && (
             <form action={logoutAction} className="ml-2 flex items-center gap-2 border-l border-white/30 pl-3 text-sm">
-              <span className="font-mono">{user.id}</span><span>{user.name}</span>
+              <span>管理員</span>
               <button type="submit" className="min-h-11 cursor-pointer rounded-[var(--radius-card)] px-2 underline-offset-2 hover:underline">登出</button>
             </form>
-          ) : (
-            <Link href="/login" className="ml-2 min-h-11 inline-flex items-center border-l border-white/30 pl-3 text-sm hover:underline">登入</Link>
           )}
         </nav>
       </div>

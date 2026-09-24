@@ -1,47 +1,36 @@
 import { eq, desc, asc, and, SQL } from 'drizzle-orm';
 import { Db } from './db/client';
-import { applications, applicationCoursesA, students, courses, Application, ApplicationCourseA } from './db/schema';
-import { findStudent } from './students';
+import { applications, applicationCoursesA, courses, Application, ApplicationCourseA } from './db/schema';
+import { DEGREES, Degree } from './degrees';
 
 export type CourseAInput = { code: string; name: string; time: string; teacher: string };
 
-export type CreateApplicationInput = {
-  studentId: string;
+export type ApplicantInput = { studentId: string; studentName: string; department: string; degree: string };
+
+export type CreateApplicationInput = ApplicantInput & {
   coursesA: CourseAInput[];
   courseBCode: string;
 };
 
 export type ApplicationDetail = Application & {
-  studentName: string;
-  department: string;
   courseBName: string;
+  courseBNameEn: string;
   courseBTeacher: string;
   courseBTime: string;
+  courseBNote: string;
   coursesA: ApplicationCourseA[];
-};
-
-export type ApplicationSummary = {
-  id: string;
-  courseBCode: string;
-  courseBName: string;
-  courseBTeacher: string;
-  courseBTime: string;
-  status: Application['status'];
-  createdAt: string;
-  receivedAt: string | null;
 };
 
 export class DuplicateApplicationError extends Error {
   constructor(public readonly existingId: string) {
-    super('你已申請過此 X-Class 課程');
+    super('此學號已申請過此 X-Class 課程');
     this.name = 'DuplicateApplicationError';
   }
 }
 
 export const MAX_COURSES_A = 5;
-export const BARCODE_LENGTH = 24;
-const SERIAL_RE = /^A\d{6}$/;
-const BARCODE_RE = /^[0-9A-Za-z ]{24}$/;
+export const MAX_APPLICANT_FIELD = 50;
+export const STUDENT_ID_RE = /^\d{9}$/;
 
 export function nextApplicationId(db: Db): string {
   const last = db.select({ id: applications.id }).from(applications).orderBy(desc(applications.id)).limit(1).get();
@@ -49,9 +38,28 @@ export function nextApplicationId(db: Db): string {
   return 'A' + String(n).padStart(6, '0');
 }
 
+/** 條碼格式：學號-科號-B（9 + 1 + 15 + 1 + 1 = 27 碼）；科號內的補位空格原樣保留。 */
+export function makeBarcode(studentId: string, courseBCode: string): string {
+  return `${studentId}-${courseBCode}-B`;
+}
+
 function assertActiveCourse(db: Db, code: string): void {
   const c = db.select().from(courses).where(eq(courses.code, code)).get();
   if (!c || c.isActive !== 1) throw new Error('課程不存在或已停用');
+}
+
+function normalizeApplicant(input: ApplicantInput): ApplicantInput & { degree: Degree } {
+  const a = {
+    studentId: input.studentId.trim(), studentName: input.studentName.trim(),
+    department: input.department.trim(), degree: input.degree.trim(),
+  };
+  if (!STUDENT_ID_RE.test(a.studentId)) throw new Error('學號必須為 9 碼數字');
+  if (!a.studentName || !a.department) throw new Error('姓名、科系皆必填');
+  if (a.studentName.length > MAX_APPLICANT_FIELD || a.department.length > MAX_APPLICANT_FIELD) {
+    throw new Error(`姓名、科系最多 ${MAX_APPLICANT_FIELD} 字`);
+  }
+  if (!(DEGREES as readonly string[]).includes(a.degree)) throw new Error('請選擇學部別');
+  return { ...a, degree: a.degree as Degree };
 }
 
 function normalizeCoursesA(input: CourseAInput[]): CourseAInput[] {
@@ -68,28 +76,30 @@ function normalizeCoursesA(input: CourseAInput[]): CourseAInput[] {
   return rows;
 }
 
+function findExistingId(db: Db, studentId: string, courseBCode: string): string | undefined {
+  return db
+    .select({ id: applications.id })
+    .from(applications)
+    .where(and(eq(applications.studentId, studentId), eq(applications.courseBCode, courseBCode)))
+    .get()?.id;
+}
+
 export function createApplication(db: Db, input: CreateApplicationInput): Application {
-  if (!findStudent(db, input.studentId)) throw new Error('查無此學號');
+  const applicant = normalizeApplicant(input);
   const coursesA = normalizeCoursesA(input.coursesA);
   assertActiveCourse(db, input.courseBCode);
 
-  const existing = db
-    .select({ id: applications.id })
-    .from(applications)
-    .where(and(eq(applications.studentId, input.studentId), eq(applications.courseBCode, input.courseBCode)))
-    .get();
-  if (existing) throw new DuplicateApplicationError(existing.id);
+  const existing = findExistingId(db, applicant.studentId, input.courseBCode);
+  if (existing) throw new DuplicateApplicationError(existing);
 
   try {
     return db.transaction((tx) => {
       const row: Application = {
         id: nextApplicationId(tx),
-        studentId: input.studentId,
+        ...applicant,
         courseBCode: input.courseBCode,
-        barcode: input.studentId + input.courseBCode,
-        status: 'printed',
+        barcode: makeBarcode(applicant.studentId, input.courseBCode),
         createdAt: new Date().toISOString(),
-        receivedAt: null,
       };
       tx.insert(applications).values(row).run();
       tx.insert(applicationCoursesA).values(coursesA.map((c, i) => ({ applicationId: row.id, seq: i + 1, ...c }))).run();
@@ -100,12 +110,8 @@ export function createApplication(db: Db, input: CreateApplicationInput): Applic
     // applications_student_course_uq（或 applications_barcode_uq）。此時重新查一次既有
     // id，轉成跟一般重複申請同樣的 DuplicateApplicationError，而不是讓 SqliteError 外洩。
     if ((e as { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE') {
-      const raced = db
-        .select({ id: applications.id })
-        .from(applications)
-        .where(and(eq(applications.studentId, input.studentId), eq(applications.courseBCode, input.courseBCode)))
-        .get();
-      if (raced) throw new DuplicateApplicationError(raced.id);
+      const raced = findExistingId(db, applicant.studentId, input.courseBCode);
+      if (raced) throw new DuplicateApplicationError(raced);
     }
     throw e;
   }
@@ -116,19 +122,19 @@ function loadDetail(db: Db, where: SQL): ApplicationDetail | undefined {
     .select({
       id: applications.id,
       studentId: applications.studentId,
+      studentName: applications.studentName,
+      department: applications.department,
+      degree: applications.degree,
       courseBCode: applications.courseBCode,
       barcode: applications.barcode,
-      status: applications.status,
       createdAt: applications.createdAt,
-      receivedAt: applications.receivedAt,
-      studentName: students.name,
-      department: students.department,
       courseBName: courses.name,
+      courseBNameEn: courses.nameEn,
       courseBTeacher: courses.teacher,
       courseBTime: courses.time,
+      courseBNote: courses.note,
     })
     .from(applications)
-    .innerJoin(students, eq(applications.studentId, students.id))
     .innerJoin(courses, eq(applications.courseBCode, courses.code))
     .where(where)
     .get();
@@ -140,57 +146,4 @@ function loadDetail(db: Db, where: SQL): ApplicationDetail | undefined {
 
 export function getApplication(db: Db, id: string): ApplicationDetail | undefined {
   return loadDetail(db, eq(applications.id, id));
-}
-
-export function findApplicationByBarcode(db: Db, barcode: string): ApplicationDetail | undefined {
-  return loadDetail(db, eq(applications.barcode, barcode));
-}
-
-export function listApplicationsByStudent(db: Db, studentId: string): ApplicationSummary[] {
-  return db
-    .select({
-      id: applications.id,
-      courseBCode: applications.courseBCode,
-      courseBName: courses.name,
-      courseBTeacher: courses.teacher,
-      courseBTime: courses.time,
-      status: applications.status,
-      createdAt: applications.createdAt,
-      receivedAt: applications.receivedAt,
-    })
-    .from(applications)
-    .innerJoin(courses, eq(applications.courseBCode, courses.code))
-    .where(eq(applications.studentId, studentId))
-    .orderBy(desc(applications.createdAt), desc(applications.id))
-    .all();
-}
-
-export type ReceiveResult =
-  | { kind: 'received'; detail: ApplicationDetail }
-  | { kind: 'already'; detail: ApplicationDetail }
-  | { kind: 'not_found' }
-  | { kind: 'bad_format' };
-
-function markReceived(db: Db, detail: ApplicationDetail): ReceiveResult {
-  if (detail.status === 'received') return { kind: 'already', detail };
-  const receivedAt = new Date().toISOString();
-  db.update(applications).set({ status: 'received', receivedAt }).where(eq(applications.id, detail.id)).run();
-  return { kind: 'received', detail: { ...detail, status: 'received', receivedAt } };
-}
-
-export function receiveApplication(db: Db, id: string): ReceiveResult {
-  const detail = getApplication(db, id);
-  if (!detail) return { kind: 'not_found' };
-  return markReceived(db, detail);
-}
-
-export function receiveByInput(db: Db, raw: string): ReceiveResult {
-  const s = raw.trim();
-  if (SERIAL_RE.test(s)) return receiveApplication(db, s);
-  if (BARCODE_RE.test(s)) {
-    const detail = findApplicationByBarcode(db, s);
-    if (!detail) return { kind: 'not_found' };
-    return markReceived(db, detail);
-  }
-  return { kind: 'bad_format' };
 }
