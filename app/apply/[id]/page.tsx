@@ -40,7 +40,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
           <table>
             <tbody>
               <tr><th>學號</th><td>{a.studentId}</td><th>姓名</th><td>{a.studentName}</td></tr>
-              <tr><th>系級</th><td colSpan={3}>{a.department}</td></tr>
+              <tr><th>科系</th><td>{a.department}</td><th>學部別</th><td>{a.degree}</td></tr>
             </tbody>
           </table>
         </section>
@@ -65,6 +65,8 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
             <tbody>
               <tr><th>科號</th><td className="code">{a.courseBCode}</td><th>上課時間</th><td>{a.courseBTime}</td></tr>
               <tr><th>課程名稱</th><td>{a.courseBName}</td><th>授課教師</th><td>{a.courseBTeacher}</td></tr>
+              {a.courseBNameEn && <tr><th>英文課名</th><td colSpan={3}>{a.courseBNameEn}</td></tr>}
+              {a.courseBNote && <tr><th>備註</th><td colSpan={3}>{a.courseBNote}</td></tr>}
             </tbody>
           </table>
         </section>

@@ -1,12 +1,9 @@
 import { count } from 'drizzle-orm';
 import { Db } from './db/client';
-import { students, courses, applications, applicationCoursesA } from './db/schema';
+import { courses, applications, applicationCoursesA } from './db/schema';
 import { createCourse } from './courses';
 
 const SURNAMES = ['王', '李', '張', '劉', '陳', '楊', '黃', '趙', '吳', '周', '林', '徐', '許', '蔡', '鄭'];
-const GIVEN = ['小明', '小華', '雅婷', '志偉', '淑芬', '俊傑', '怡君', '家豪', '佩珊', '冠宇', '心怡', '宗翰', '欣妤', '柏翰', '思穎'];
-const DEPARTMENTS = ['資工系', '電機系', '數學系', '物理系', '化學系', '經濟系', '中文系', '外語系', '生科系', '材料系'];
-const GRADES = ['一年級', '二年級', '三年級', '四年級'];
 const COURSE_BASES = ['微積分', '普通物理', '計算機概論', '線性代數', '普通化學', '經濟學原理', '英文寫作', '資料結構', '統計學', '生命科學導論'];
 const DEPT_CODES = ['EECS', 'MATH', 'PHYS', 'CHEM', 'ECON', 'CHIN', 'LANG', 'LIFE', 'MSE0', 'CS  '];
 const TIMES = ['M1M2', 'T3T4', 'W5W6', 'R7R8', 'F1F2', 'M3M4R3R4'];
@@ -15,7 +12,7 @@ function pick<T>(arr: T[], i: number): T { return arr[i % arr.length]; }
 
 export function seed(db: Db, { ifEmpty }: { ifEmpty: boolean }): 'seeded' | 'skipped' {
   if (ifEmpty) {
-    const existing = db.select({ n: count() }).from(students).get();
+    const existing = db.select({ n: count() }).from(courses).get();
     if (existing && existing.n > 0) {
       return 'skipped';
     }
@@ -25,20 +22,6 @@ export function seed(db: Db, { ifEmpty }: { ifEmpty: boolean }): 'seeded' | 'ski
     tx.delete(applicationCoursesA).run();
     tx.delete(applications).run();
     tx.delete(courses).run();
-    tx.delete(students).run();
-
-    const studentRows = Array.from({ length: 2000 }, (_, i) => {
-      const n = i + 1;
-      return {
-        id: '113' + String(n).padStart(6, '0'),
-        name: pick(SURNAMES, n * 7) + pick(GIVEN, n * 13),
-        department: `${pick(DEPARTMENTS, Math.floor(i / 200))} ${pick(GRADES, Math.floor(i / 50))}`,
-        isActive: 1,
-      };
-    });
-    for (let i = 0; i < studentRows.length; i += 500) {
-      tx.insert(students).values(studentRows.slice(i, i + 500)).run();
-    }
 
     for (let i = 1; i <= 100; i++) {
       createCourse(tx, {
@@ -47,6 +30,7 @@ export function seed(db: Db, { ifEmpty }: { ifEmpty: boolean }): 'seeded' | 'ski
         nameEn: `Course ${i}`,
         teacher: `${pick(SURNAMES, i * 3)}教授`,
         time: pick(TIMES, i - 1),
+        note: i % 10 === 0 ? '限大學部' : '',
       });
     }
   });

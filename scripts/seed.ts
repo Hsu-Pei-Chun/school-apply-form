@@ -8,5 +8,5 @@ const result = seed(db, { ifEmpty });
 if (result === 'skipped') {
   console.log('既有資料，略過 seed');
 } else {
-  console.log('seed 完成：2000 學生、100 課程');
+  console.log('seed 完成：100 課程');
 }

@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { createDb } from '@/lib/db/client';
-import { students, courses, applications, applicationCoursesA } from '@/lib/db/schema';
+import { courses, applications, applicationCoursesA } from '@/lib/db/schema';
 import { seed } from '@/lib/seed';
 import { createApplication } from '@/lib/applications';
 
 describe('seed', () => {
-  it('空 DB 執行會寫入 2000 學生，回傳 seeded', () => {
+  it('空 DB 執行會寫入 100 課程，回傳 seeded', () => {
     const db = createDb(':memory:');
     const result = seed(db, { ifEmpty: true });
     expect(result).toBe('seeded');
-    expect(db.select().from(students).all().length).toBe(2000);
+    expect(db.select().from(courses).all().length).toBe(100);
   });
 
   it('ifEmpty: true 且已有資料時略過，回傳 skipped', () => {
@@ -17,7 +17,7 @@ describe('seed', () => {
     seed(db, { ifEmpty: true });
     const result = seed(db, { ifEmpty: true });
     expect(result).toBe('skipped');
-    expect(db.select().from(students).all().length).toBe(2000);
+    expect(db.select().from(courses).all().length).toBe(100);
   });
 
   it('ifEmpty: false 即使已有資料也會重置重寫，不會重複累加', () => {
@@ -25,15 +25,16 @@ describe('seed', () => {
     seed(db, { ifEmpty: true });
     const result = seed(db, { ifEmpty: false });
     expect(result).toBe('seeded');
-    expect(db.select().from(students).all().length).toBe(2000);
+    expect(db.select().from(courses).all().length).toBe(100);
   });
 
-  it('學號 9 碼、科號 15 碼', () => {
+  it('科號 15 碼、皆有上課時間，部分課程有備註', () => {
     const db = createDb(':memory:');
     seed(db, { ifEmpty: false });
-    expect(db.select().from(students).limit(1).get()?.id).toBe('113000001');
-    expect(db.select().from(courses).all().every(c => c.code.length === 15)).toBe(true);
-    expect(db.select().from(courses).all().every(c => c.time.length > 0)).toBe(true);
+    const all = db.select().from(courses).all();
+    expect(all.every(c => c.code.length === 15)).toBe(true);
+    expect(all.every(c => c.time.length > 0)).toBe(true);
+    expect(all.some(c => c.note.length > 0)).toBe(true);
   });
 
   it('科號含校方補位空格', () => {
@@ -45,10 +46,9 @@ describe('seed', () => {
   it('seed 後已有申請紀錄時，重新 seed（ifEmpty:false）不因外鍵約束拋錯，且申請相關表清空', () => {
     const db = createDb(':memory:');
     seed(db, { ifEmpty: true });
-    const studentId = db.select().from(students).limit(1).get()!.id;
     const courseCode = db.select().from(courses).limit(1).get()!.code;
     createApplication(db, {
-      studentId,
+      studentId: '113000001', studentName: '王小明', department: '資工系', degree: '大學部',
       coursesA: [
         { code: 'EE2010', name: '電路學', time: 'M3M4', teacher: '林教授' },
         { code: 'CS1010', name: '計概', time: 'T5T6', teacher: '陳教授' },

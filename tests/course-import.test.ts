@@ -72,6 +72,20 @@ describe('標題列對應', () => {
   });
 });
 
+describe('備註欄', () => {
+  it('標題含「備註」時對應到 note，並隨匯入寫入課程', () => {
+    const text = '科號\t中文課名\t英文課名\t任課教師\t上課時間\t備註\n11510AIA 200100\t統計學\tStatistics\t李宗穎\tW2W3W4\t限大學部';
+    const rows = parseCourseImport(text);
+    expect(rows[0]).toMatchObject({ code: '11510AIA 200100', teacher: '李宗穎', time: 'W2W3W4', note: '限大學部' });
+    applyCourseImport(db, planCourseImport(db, rows));
+    expect(listCourses(db)[0].note).toBe('限大學部');
+  });
+  it('無標題時第 6 欄為備註；缺少時為空字串', () => {
+    expect(parseCourseImport('11510AIA 200100\t統計學\tStatistics\tW2W3W4\t李宗穎\t需自備筆電')[0].note).toBe('需自備筆電');
+    expect(parseCourseImport('11510AIA 200100\t統計學\tStatistics\tW2W3W4\t李宗穎')[0].note).toBe('');
+  });
+});
+
 describe('CSV 引號', () => {
   it('逗號模式：引號內逗號不切、雙引號跳脫', () => {
     const text = '科號,中文課名,英文課名,上課時間,教師\n11510AIA 200100,"統計學, 進階","Stats ""A""",W2W3W4,"台大李宗穎,周瑞賢"';

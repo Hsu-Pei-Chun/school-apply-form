@@ -20,8 +20,8 @@ export default function LoginForm({ next }: { next: string }) {
   return (
     <form action={onSubmit} className="flex flex-col gap-5">
       <input type="hidden" name="next" value={next} />
-      <Field id="studentId" label="學號" hint="Demo 環境：輸入學號即可登入（例：113000001），正式環境將由校務系統單一登入取代" error={error}>
-        <input id="studentId" name="studentId" className="input" required autoComplete="username" inputMode="numeric" maxLength={9} />
+      <Field id="password" label="管理員密碼" error={error}>
+        <input id="password" name="password" type="password" className="input" required autoComplete="current-password" />
       </Field>
       <Button type="submit" variant="primary" loading={pending}>登入</Button>
     </form>

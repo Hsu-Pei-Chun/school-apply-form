@@ -1,16 +1,6 @@
 import { sqliteTable, text, integer, check, uniqueIndex, index } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
-
-export const students = sqliteTable(
-  'students',
-  {
-    id: text('id').primaryKey(),
-    name: text('name').notNull(),
-    department: text('department').notNull(),
-    isActive: integer('is_active').notNull().default(1),
-  },
-  (t) => [check('students_id_len', sql`length(${t.id}) = 9`)]
-);
+import { DEGREES } from '../degrees';
 
 export const courses = sqliteTable(
   'courses',
@@ -20,26 +10,30 @@ export const courses = sqliteTable(
     nameEn: text('name_en').notNull().default(''),
     teacher: text('teacher').notNull(),
     time: text('time').notNull(),
+    note: text('note').notNull().default(''),
     isActive: integer('is_active').notNull().default(1),
     createdAt: text('created_at').notNull(),
   },
   (t) => [check('courses_code_len', sql`length(${t.code}) = 15`)]
 );
 
+// 申請人資料由申請人自行填寫，直接存在申請單上（不再對照學生名單）。
 export const applications = sqliteTable(
   'applications',
   {
     id: text('id').primaryKey(),
-    studentId: text('student_id').notNull().references(() => students.id),
+    studentId: text('student_id').notNull(),
+    studentName: text('student_name').notNull(),
+    department: text('department').notNull(),
+    degree: text('degree', { enum: DEGREES }).notNull(),
     courseBCode: text('course_b_code').notNull().references(() => courses.code),
     barcode: text('barcode').notNull(),
-    status: text('status', { enum: ['printed', 'received'] }).notNull().default('printed'),
     createdAt: text('created_at').notNull(),
-    receivedAt: text('received_at'),
   },
   (t) => [
-    check('applications_status_check', sql`${t.status} IN ('printed', 'received')`),
-    check('applications_barcode_len', sql`length(${t.barcode}) = 24`),
+    check('applications_student_id_len', sql`length(${t.studentId}) = 9`),
+    check('applications_degree_check', sql.raw(`"degree" IN (${DEGREES.map(d => `'${d}'`).join(', ')})`)),
+    check('applications_barcode_len', sql`length(${t.barcode}) = 27`),
     uniqueIndex('applications_barcode_uq').on(t.barcode),
     uniqueIndex('applications_student_course_uq').on(t.studentId, t.courseBCode),
   ]
@@ -62,7 +56,6 @@ export const applicationCoursesA = sqliteTable(
   ]
 );
 
-export type Student = typeof students.$inferSelect;
 export type Course = typeof courses.$inferSelect;
 export type Application = typeof applications.$inferSelect;
 export type ApplicationCourseA = typeof applicationCoursesA.$inferSelect;

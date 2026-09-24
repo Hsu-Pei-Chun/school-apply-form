@@ -34,6 +34,6 @@ RUN mkdir -p /app/data
 EXPOSE 3000
 # 每次啟動都跑 seed --if-empty：createDb() 內的 migrate() 會讓 DB 檔案在插入任何資料列前就變成非空，
 # 若靠檔案是否為空（[ ! -s ]）判斷是否要 seed，seed 途中若中斷會留下「已 migrate 但沒資料」的 DB，
-# 且之後永遠不會再補 seed。改由 lib/seed.ts 用 SELECT count(*) FROM students 判斷，且整個 delete+insert
+# 且之後永遠不會再補 seed。改由 lib/seed.ts 用 SELECT count(*) FROM courses 判斷，且整個 delete+insert
 # 包在同一個 transaction 內，中斷會 rollback 回 0 筆，下次啟動仍會偵測到空表而重新 seed。
 CMD ["sh", "-c", "node node_modules/tsx/dist/cli.mjs scripts/seed.ts --if-empty && node server.js"]

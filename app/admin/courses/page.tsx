@@ -31,6 +31,7 @@ export default function CoursesPage() {
               <th className="px-4 py-3 font-semibold">英文課名</th>
               <th className="px-4 py-3 font-semibold">教師</th>
               <th className="px-4 py-3 font-semibold">時間</th>
+              <th className="px-4 py-3 font-semibold">備註</th>
               <th className="px-4 py-3 font-semibold">狀態</th>
               <th className="px-4 py-3 font-semibold">建立</th>
               <th className="px-4 py-3" />
@@ -44,6 +45,7 @@ export default function CoursesPage() {
                 <td className="px-4 py-2">{c.nameEn}</td>
                 <td className="px-4 py-2">{c.teacher}</td>
                 <td className="px-4 py-2 font-mono">{c.time}</td>
+                <td className="px-4 py-2">{c.note}</td>
                 <td className="px-4 py-2"><Badge tone={c.isActive ? 'success' : 'neutral'}>{c.isActive ? '啟用' : '停用'}</Badge></td>
                 <td className="px-4 py-2 whitespace-nowrap">{formatDate(c.createdAt)}</td>
                 <td className="px-4 py-2 text-right">

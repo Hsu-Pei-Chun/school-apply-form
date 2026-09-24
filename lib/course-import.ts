@@ -3,19 +3,20 @@ import { Db } from './db/client';
 import { courses } from './db/schema';
 import { createCourse, COURSE_CODE_RE, COURSE_CODE_ERROR } from './courses';
 
-export type ParsedRow = { line: number; code: string; name: string; nameEn: string; teacher: string; time: string; raw: string };
+export type ParsedRow = { line: number; code: string; name: string; nameEn: string; teacher: string; time: string; note: string; raw: string };
 export type PlanRow = ParsedRow & ({ status: 'add' } | { status: 'skip'; reason: string } | { status: 'error'; reason: string });
 export type ImportPlan = { rows: PlanRow[]; addCount: number; skipCount: number; errorCount: number };
 
 export const MAX_IMPORT_LINES = 2000;
 
-type Field = 'code' | 'name' | 'nameEn' | 'time' | 'teacher';
+type Field = 'code' | 'name' | 'nameEn' | 'time' | 'teacher' | 'note';
 const HEADER_ALIASES: Record<Field, string[]> = {
-  code: ['科號'], name: ['中文課名', '課名', '課程名稱'], nameEn: ['英文課名'], time: ['上課時間', '時間'], teacher: ['教師', '授課教師'],
+  code: ['科號'], name: ['中文課名', '課名', '課程名稱'], nameEn: ['英文課名'], time: ['上課時間', '時間'], teacher: ['教師', '授課教師', '任課教師'],
+  note: ['備註'],
 };
 const REQUIRED: Field[] = ['code', 'name', 'time', 'teacher'];
-const DEFAULT_ORDER: Field[] = ['code', 'name', 'nameEn', 'time', 'teacher'];
-const FIELD_LABEL: Record<Field, string> = { code: '科號', name: '中文課名', nameEn: '英文課名', time: '上課時間', teacher: '教師' };
+const DEFAULT_ORDER: Field[] = ['code', 'name', 'nameEn', 'time', 'teacher', 'note'];
+const FIELD_LABEL: Record<Field, string> = { code: '科號', name: '中文課名', nameEn: '英文課名', time: '上課時間', teacher: '教師', note: '備註' };
 
 function splitCsv(line: string): string[] {
   const out: string[] = []; let cur = ''; let q = false;
@@ -65,7 +66,7 @@ export function parseCourseImport(text: string): ParsedRow[] {
       const i = map ? map[f] : DEFAULT_ORDER.indexOf(f);
       return i === undefined || i < 0 ? '' : (cells[i] ?? '');
     };
-    rows.push({ line: idx + 1, code: get('code'), name: get('name'), nameEn: get('nameEn'), teacher: get('teacher'), time: get('time'), raw });
+    rows.push({ line: idx + 1, code: get('code'), name: get('name'), nameEn: get('nameEn'), teacher: get('teacher'), time: get('time'), note: get('note'), raw });
   });
   return rows;
 }
@@ -98,7 +99,7 @@ export function applyCourseImport(db: Db, plan: ImportPlan): number {
     let n = 0;
     for (const r of plan.rows) {
       if (r.status !== 'add') continue;
-      createCourse(tx, { code: r.code, name: r.name, nameEn: r.nameEn, teacher: r.teacher, time: r.time });
+      createCourse(tx, { code: r.code, name: r.name, nameEn: r.nameEn, teacher: r.teacher, time: r.time, note: r.note });
       n++;
     }
     return n;

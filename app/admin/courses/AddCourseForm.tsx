@@ -18,7 +18,7 @@ export default function AddCourseForm() {
   }
 
   return (
-    <form action={onSubmit} className="grid gap-4 sm:grid-cols-[1fr_2fr_2fr_1fr_1fr_auto] sm:items-end">
+    <form action={onSubmit} className="grid gap-4 sm:grid-cols-3 sm:items-end">
       <Field id="code" label="科號（15 碼）" hint="例：11510AIA 500700（含空格補位，共 15 碼）">
         <input id="code" name="code" className="input font-mono" maxLength={15} minLength={15} pattern="[0-9A-Za-z ]{15}" required />
       </Field>
@@ -26,8 +26,9 @@ export default function AddCourseForm() {
       <Field id="nameEn" label="英文課名（選填）"><input id="nameEn" name="nameEn" className="input" /></Field>
       <Field id="teacher" label="授課教師"><input id="teacher" name="teacher" className="input" required /></Field>
       <Field id="time" label="上課時間" hint="例：M1M2、T1T2R1R2"><input id="time" name="time" className="input font-mono" required /></Field>
-      <Button type="submit" variant="primary" loading={pending}>新增</Button>
-      {error && <p role="alert" className="text-sm text-danger sm:col-span-6">{error}</p>}
+      <Field id="note" label="備註（選填）"><input id="note" name="note" className="input" /></Field>
+      <Button type="submit" variant="primary" loading={pending} className="sm:col-start-3">新增</Button>
+      {error && <p role="alert" className="text-sm text-danger sm:col-span-3">{error}</p>}
     </form>
   );
 }
