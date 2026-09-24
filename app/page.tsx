@@ -1,15 +1,17 @@
 import Link from 'next/link';
 import Card from '@/components/Card';
+import { getLocale } from '@/lib/locale';
+import { dict } from '@/lib/i18n';
 
-const ITEMS = [
-  { href: '/apply', title: '學生申請', desc: '填寫申請人資料、一般課程與 X-Class 課程，產生含條碼的申請表' },
-  { href: '/admin/courses', title: '課程管理', desc: '新增、匯入、停用課程（需管理員登入）' },
-];
-
-export default function Home() {
+export default async function Home() {
+  const t = dict(await getLocale()).home;
+  const items = [
+    { href: '/apply', title: t.applyTitle, desc: t.applyDesc },
+    { href: '/admin/courses', title: t.coursesTitle, desc: t.coursesDesc },
+  ];
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      {ITEMS.map((item) => (
+      {items.map((item) => (
         <Link key={item.href} href={item.href} className="block">
           <Card className="transition-colors duration-150 hover:bg-background">
             <h2 className="text-lg font-semibold text-foreground">{item.title}</h2>

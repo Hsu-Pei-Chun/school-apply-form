@@ -15,6 +15,13 @@
       "when": 1790257649077,
       "tag": "0001_self_input_applicant",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790259917511,
+      "tag": "0002_form_settings",
+      "breakpoints": true
     }
   ]
 }

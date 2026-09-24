@@ -2,6 +2,7 @@ import { eq, desc, asc, and, SQL } from 'drizzle-orm';
 import { Db } from './db/client';
 import { applications, applicationCoursesA, courses, Application, ApplicationCourseA } from './db/schema';
 import { DEGREES, Degree } from './degrees';
+import { AppError } from './messages';
 
 export type CourseAInput = { code: string; name: string; time: string; teacher: string };
 
@@ -21,9 +22,9 @@ export type ApplicationDetail = Application & {
   coursesA: ApplicationCourseA[];
 };
 
-export class DuplicateApplicationError extends Error {
+export class DuplicateApplicationError extends AppError {
   constructor(public readonly existingId: string) {
-    super('此學號已申請過此 X-Class 課程');
+    super('duplicateApplication');
     this.name = 'DuplicateApplicationError';
   }
 }
@@ -45,7 +46,7 @@ export function makeBarcode(studentId: string, courseBCode: string): string {
 
 function assertActiveCourse(db: Db, code: string): void {
   const c = db.select().from(courses).where(eq(courses.code, code)).get();
-  if (!c || c.isActive !== 1) throw new Error('課程不存在或已停用');
+  if (!c || c.isActive !== 1) throw new AppError('courseUnavailable');
 }
 
 function normalizeApplicant(input: ApplicantInput): ApplicantInput & { degree: Degree } {
@@ -53,12 +54,12 @@ function normalizeApplicant(input: ApplicantInput): ApplicantInput & { degree: D
     studentId: input.studentId.trim(), studentName: input.studentName.trim(),
     department: input.department.trim(), degree: input.degree.trim(),
   };
-  if (!STUDENT_ID_RE.test(a.studentId)) throw new Error('學號必須為 9 碼數字');
-  if (!a.studentName || !a.department) throw new Error('姓名、科系皆必填');
+  if (!STUDENT_ID_RE.test(a.studentId)) throw new AppError('studentIdFormat');
+  if (!a.studentName || !a.department) throw new AppError('applicantRequired');
   if (a.studentName.length > MAX_APPLICANT_FIELD || a.department.length > MAX_APPLICANT_FIELD) {
-    throw new Error(`姓名、科系最多 ${MAX_APPLICANT_FIELD} 字`);
+    throw new AppError('applicantTooLong', { n: MAX_APPLICANT_FIELD });
   }
-  if (!(DEGREES as readonly string[]).includes(a.degree)) throw new Error('請選擇學部別');
+  if (!(DEGREES as readonly string[]).includes(a.degree)) throw new AppError('degreeRequired');
   return { ...a, degree: a.degree as Degree };
 }
 
@@ -67,11 +68,11 @@ function normalizeCoursesA(input: CourseAInput[]): CourseAInput[] {
     code: c.code.trim(), name: c.name.trim(), time: c.time.trim(), teacher: c.teacher.trim(),
   }));
   if (rows.length === 0 || rows.some(r => !r.code || !r.name || !r.time || !r.teacher)) {
-    throw new Error('一般課程至少一門，且每門四欄皆必填');
+    throw new AppError('courseARequired');
   }
-  if (rows.length > MAX_COURSES_A) throw new Error('一般課程最多五門');
+  if (rows.length > MAX_COURSES_A) throw new AppError('courseATooMany');
   if (rows.some(r => r.code.length > 100 || r.name.length > 100 || r.time.length > 100 || r.teacher.length > 100)) {
-    throw new Error('一般課程欄位最多 100 字');
+    throw new AppError('courseATooLong');
   }
   return rows;
 }

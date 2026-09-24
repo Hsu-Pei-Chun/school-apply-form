@@ -3,6 +3,8 @@
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/db/client';
 import { createApplication, DuplicateApplicationError, MAX_COURSES_A, CourseAInput } from '@/lib/applications';
+import { getLocale } from '@/lib/locale';
+import { errorText } from '@/lib/messages';
 
 function parseCoursesA(formData: FormData): CourseAInput[] {
   const rows: CourseAInput[] = [];
@@ -30,8 +32,8 @@ export async function submitApplication(formData: FormData): Promise<{ error: st
       courseBCode: field('courseBCode'),
     }).id;
   } catch (e) {
-    if (e instanceof DuplicateApplicationError) return { error: e.message, existingId: e.existingId };
-    return { error: (e as Error).message };
+    const error = errorText(await getLocale(), e);
+    return e instanceof DuplicateApplicationError ? { error, existingId: e.existingId } : { error };
   }
   redirect(`/apply/${id}`);
 }
