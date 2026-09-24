@@ -18,7 +18,7 @@ export async function addCourse(formData: FormData): Promise<{ error: string } |
   const note = String(formData.get('note') ?? '').trim();
   if (!code || !name || !teacher || !time) return { error: msg(await getLocale(), 'courseFieldsRequired') };
   try {
-    createCourse(getDb(), { code, name, nameEn, teacher, time, note });
+    await createCourse(await getDb(), { code, name, nameEn, teacher, time, note });
   } catch (e) {
     return { error: errorText(await getLocale(), e) };
   }
@@ -29,14 +29,14 @@ export async function toggleCourse(formData: FormData) {
   await requireAdmin();
   const code = String(formData.get('code'));
   const isActive = formData.get('isActive') === '1';
-  setCourseActive(getDb(), code, !isActive);
+  await setCourseActive(await getDb(), code, !isActive);
   revalidatePath('/admin/courses');
 }
 
 export async function previewImport(text: string): Promise<ImportPlan | { error: string }> {
   await requireAdmin();
   try {
-    return planCourseImport(getDb(), parseCourseImport(String(text ?? '')));
+    return await planCourseImport(await getDb(), parseCourseImport(String(text ?? '')));
   } catch (e) {
     return { error: errorText(await getLocale(), e) };
   }
@@ -44,10 +44,10 @@ export async function previewImport(text: string): Promise<ImportPlan | { error:
 
 export async function confirmImport(text: string): Promise<{ imported: number } | { error: string }> {
   await requireAdmin();
-  const db = getDb();
+  const db = await getDb();
   try {
-    const plan = planCourseImport(db, parseCourseImport(String(text ?? '')));
-    const imported = applyCourseImport(db, plan);
+    const plan = await planCourseImport(db, parseCourseImport(String(text ?? '')));
+    const imported = await applyCourseImport(db, plan);
     revalidatePath('/admin/courses');
     revalidatePath('/apply');
     return { imported };

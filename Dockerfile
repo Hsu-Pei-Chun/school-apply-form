@@ -1,6 +1,5 @@
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -12,6 +11,7 @@ RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
+# 正式環境請設定 TURSO_DATABASE_URL／TURSO_AUTH_TOKEN；未設定時退回容器內的 SQLite 檔案（DATABASE_PATH，重啟會遺失）
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 DATABASE_PATH=/app/data/app.db
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static

@@ -41,7 +41,7 @@ npm run dev
 npm test
 ```
 
-## 資料庫
+## Schema 變更
 
 改了 `lib/db/schema.ts` 後，需要重新產生 migration：
 
@@ -49,25 +49,49 @@ npm test
 npm run db:generate
 ```
 
+## 資料庫（Turso）
+
+正式環境使用 [Turso](https://turso.tech)（雲端 SQLite），資料不會因為 Render 重新部署、重啟或休眠而遺失。本機開發未設定時自動改用本機檔案 `data/app.db`。
+
+| 環境變數 | 說明 |
+| --- | --- |
+| `TURSO_DATABASE_URL` | Turso 資料庫網址，例：`libsql://school-apply-form-xxx.turso.io` |
+| `TURSO_AUTH_TOKEN` | Turso 資料庫的存取 token |
+| `DATABASE_PATH` | 未設定 Turso 時使用的本機 SQLite 檔案路徑（預設 `data/app.db`） |
+
+建立 Turso 資料庫（**請建立 libSQL 類型**，`@libsql/client` 與 Drizzle 連線的是 libSQL 資料庫；不要加 `--tursodb`）：
+
+```bash
+turso auth signup                              # 或 turso auth login
+turso db create school-apply-form              # 建立 libSQL 資料庫
+turso db show school-apply-form --url          # → TURSO_DATABASE_URL（libsql://...）
+turso db tokens create school-apply-form       # → TURSO_AUTH_TOKEN
+```
+
+也可以在 https://app.turso.tech 後台建立資料庫，並在該資料庫頁面取得 URL 與建立 token（需讀寫權限）。
+
+資料表會在網站第一次存取資料庫時自動建立（migration 自動套用），不需手動執行。
+
+**Turso 免費方案閒置 10 天會封存資料庫**，封存後需用 `turso group unarchive <group>` 恢復。`.github/workflows/keep-alive.yml` 每 3 天呼叫一次 `/api/health`（會實際查詢資料庫）以避免封存；GitHub 會在 repo 連續 60 天沒有 commit 時停用排程，屆時需到 Actions 頁面重新啟用。網站網址不同時，在 repo 的 Settings → Secrets and variables → Actions → Variables 設定 `HEALTHCHECK_URL`。
+
 ## 部署
-
-### Railway
-
-1. 把 repo push 到 GitHub。
-2. Railway → New Project → Deploy from GitHub repo，選此 repo；Railway 會偵測 `Dockerfile`。
-3. Settings → Volumes → Add Volume，Mount path 填 `/app/data`（SQLite 檔案放這裡，重新部署不會遺失）。
-4. Variables 確認 `DATABASE_PATH=/app/data/app.db`（Dockerfile 已預設，可不填）。
-5. Variables 新增 `ADMIN_PASSWORD`（管理員密碼）。
-6. Settings → Networking → Generate Domain，即可拿到公開網址給他人測試。
-
-schema 異動時，migration 會在啟動後第一次存取資料庫時自動套用，不需手動執行。
 
 ### Render
 
 1. 把 repo push 到 GitHub。
 2. Render → New → Web Service，連結此 repo；Render 會自動偵測 `Dockerfile`。
-3. Environment 新增 `ADMIN_PASSWORD`（管理員密碼）。
-4. Database path 預設 `/app/data/app.db`（Dockerfile 已預設環境變數）。
-5. **Render Free plan 磁碟不持久**：每次部署、閒置休眠後被喚醒、或 Render 重啟容器時，SQLite 檔案都會遺失（申請單、匯入的課程、申請表設定全部消失，回到空白資料庫），需重新匯入課程。僅適合 demo；正式使用請改用付費方案並加掛 Persistent Disk（Mount path `/app/data`），程式不需修改。
+3. Environment 新增：
+   - `ADMIN_PASSWORD`：管理員密碼
+   - `TURSO_DATABASE_URL`、`TURSO_AUTH_TOKEN`：見上方「資料庫（Turso）」
+4. 部署完成後，以管理員登入並匯入課程。
 
-> 注意：這是單一容器 + SQLite，資料需放在持久磁碟上。若日後改用 Postgres，需將 `lib/db/schema.ts` 改為 `pg-core`、資料存取函式改為 async，並重新產生 migration。
+未設定 Turso 時會退回容器內的 SQLite 檔案；Render 免費方案磁碟不持久，重啟後資料會遺失（僅適合 demo）。
+
+### Railway
+
+1. 把 repo push 到 GitHub。
+2. Railway → New Project → Deploy from GitHub repo，選此 repo；Railway 會偵測 `Dockerfile`。
+3. Variables 新增 `ADMIN_PASSWORD`、`TURSO_DATABASE_URL`、`TURSO_AUTH_TOKEN`。
+4. Settings → Networking → Generate Domain，即可拿到公開網址。
+
+> 正式建置使用 webpack（`npm run build`）；Turbopack 的 production build 目前無法處理 `@libsql/client`，開發模式（`npm run dev`）仍使用 Turbopack。

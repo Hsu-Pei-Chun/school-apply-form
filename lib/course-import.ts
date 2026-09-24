@@ -71,11 +71,14 @@ export function parseCourseImport(text: string): ParsedRow[] {
   return rows;
 }
 
-export function planCourseImport(db: Db, rows: ParsedRow[]): ImportPlan {
-  const codes = rows.map(r => r.code).filter(Boolean);
-  const existing = new Set(
-    codes.length ? db.select({ code: courses.code }).from(courses).where(inArray(courses.code, codes)).all().map(r => r.code) : []
-  );
+export async function planCourseImport(db: Db, rows: ParsedRow[]): Promise<ImportPlan> {
+  const codes = [...new Set(rows.map(r => r.code).filter(Boolean))];
+  const existing = new Set<string>();
+  // 分批查詢：遠端資料庫（Turso）單一查詢的參數數量有上限
+  for (let i = 0; i < codes.length; i += 500) {
+    const found = await db.select({ code: courses.code }).from(courses).where(inArray(courses.code, codes.slice(i, i + 500))).all();
+    for (const r of found) existing.add(r.code);
+  }
   const seen = new Set<string>();
   const out: PlanRow[] = rows.map(r => {
     if (!COURSE_CODE_RE.test(r.code)) return { ...r, status: 'error', reason: 'courseCodeFormat' };
@@ -93,13 +96,13 @@ export function planCourseImport(db: Db, rows: ParsedRow[]): ImportPlan {
   };
 }
 
-export function applyCourseImport(db: Db, plan: ImportPlan): number {
+export async function applyCourseImport(db: Db, plan: ImportPlan): Promise<number> {
   if (plan.errorCount > 0) throw new AppError('importHasErrors');
-  return db.transaction((tx) => {
+  return db.transaction(async (tx) => {
     let n = 0;
     for (const r of plan.rows) {
       if (r.status !== 'add') continue;
-      createCourse(tx, { code: r.code, name: r.name, nameEn: r.nameEn, teacher: r.teacher, time: r.time, note: r.note });
+      await createCourse(tx, { code: r.code, name: r.name, nameEn: r.nameEn, teacher: r.teacher, time: r.time, note: r.note });
       n++;
     }
     return n;

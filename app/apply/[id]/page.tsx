@@ -13,13 +13,13 @@ export const dynamic = 'force-dynamic';
 
 export default async function PrintPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const db = getDb();
-  const a = getApplication(db, id);
+  const db = await getDb();
+  const a = await getApplication(db, id);
   if (!a) notFound();
   const locale = await getLocale();
   const d = dict(locale);
   const t = d.print;
-  const text = getFormText(db, locale);
+  const text = await getFormText(db, locale);
   const svg = renderCode128Svg(a.barcode);
 
   return (

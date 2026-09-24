@@ -41,34 +41,34 @@ function defaults(): FormSettingsInput {
   };
 }
 
-export function getFormSettings(db: Db): FormSettingsInput {
-  const stored = Object.fromEntries(db.select().from(formSettings).all().map(r => [r.key, r.value]));
+export async function getFormSettings(db: Db): Promise<FormSettingsInput> {
+  const stored = Object.fromEntries((await db.select().from(formSettings).all()).map(r => [r.key, r.value]));
   const d = defaults();
   return Object.fromEntries(KEYS.map(k => [k, stored[k] ?? d[k]])) as FormSettingsInput;
 }
 
-export function getFormText(db: Db, locale: Locale): FormText {
-  const s = getFormSettings(db);
+export async function getFormText(db: Db, locale: Locale): Promise<FormText> {
+  const s = await getFormSettings(db);
   return locale === 'en'
     ? { terms: splitTerms(s.termsEn), submitNote: s.submitNoteEn }
     : { terms: splitTerms(s.termsZh), submitNote: s.submitNoteZh };
 }
 
-export function saveFormSettings(db: Db, input: FormSettingsInput): FormSettingsInput {
+export async function saveFormSettings(db: Db, input: FormSettingsInput): Promise<FormSettingsInput> {
   const v: FormSettingsInput = {
     termsZh: splitTerms(input.termsZh).join('\n'), termsEn: splitTerms(input.termsEn).join('\n'),
     submitNoteZh: input.submitNoteZh.trim(), submitNoteEn: input.submitNoteEn.trim(),
   };
   if (!v.termsZh || !v.termsEn) throw new AppError('termsRequired');
   if (KEYS.some(k => v[k].length > MAX_SETTING_LENGTH)) throw new AppError('settingTooLong', { n: MAX_SETTING_LENGTH });
-  db.transaction((tx) => {
+  await db.transaction(async (tx) => {
     for (const key of KEYS) {
-      tx.insert(formSettings).values({ key, value: v[key] }).onConflictDoUpdate({ target: formSettings.key, set: { value: v[key] } }).run();
+      await tx.insert(formSettings).values({ key, value: v[key] }).onConflictDoUpdate({ target: formSettings.key, set: { value: v[key] } }).run();
     }
   });
   return v;
 }
 
-export function resetFormSettings(db: Db): void {
-  db.delete(formSettings).run();
+export async function resetFormSettings(db: Db): Promise<void> {
+  await db.delete(formSettings).run();
 }

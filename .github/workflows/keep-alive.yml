@@ -1,0 +1,20 @@
+# 每 3 天呼叫一次網站的健康檢查（會實際查詢資料庫），
+# 避免 Turso 免費方案的資料庫因閒置 10 天被封存。
+# 網址可在 repo 的 Settings → Secrets and variables → Actions → Variables 設定 HEALTHCHECK_URL 覆蓋。
+# 注意：GitHub 會在 repo 連續 60 天沒有任何 commit 時停用排程，屆時需到 Actions 頁面重新啟用。
+name: keep-alive
+
+on:
+  schedule:
+    - cron: '0 3 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        env:
+          URL: ${{ vars.HEALTHCHECK_URL || 'https://school-apply-form.onrender.com/api/health' }}
+        # Render 免費方案休眠後冷啟動約需 50 秒，因此放寬逾時並重試
+        run: curl --fail --silent --show-error --max-time 120 --retry 3 --retry-delay 30 --retry-all-errors "$URL"

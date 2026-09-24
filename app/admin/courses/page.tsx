@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 export default async function CoursesPage() {
   const locale = await getLocale();
   const t = dict(locale).courses;
-  const rows = listCourses(getDb());
+  const rows = await listCourses(await getDb());
   return (
     <>
       <h1 className="mb-1 text-2xl font-semibold">{t.title}</h1>
