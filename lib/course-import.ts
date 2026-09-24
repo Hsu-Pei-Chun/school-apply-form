@@ -1,10 +1,11 @@
 import { inArray } from 'drizzle-orm';
 import { Db } from './db/client';
 import { courses } from './db/schema';
-import { createCourse, COURSE_CODE_RE, COURSE_CODE_ERROR } from './courses';
+import { createCourse, COURSE_CODE_RE } from './courses';
+import { AppError, MessageKey } from './messages';
 
 export type ParsedRow = { line: number; code: string; name: string; nameEn: string; teacher: string; time: string; note: string; raw: string };
-export type PlanRow = ParsedRow & ({ status: 'add' } | { status: 'skip'; reason: string } | { status: 'error'; reason: string });
+export type PlanRow = ParsedRow & ({ status: 'add' } | { status: 'skip'; reason: MessageKey } | { status: 'error'; reason: MessageKey });
 export type ImportPlan = { rows: PlanRow[]; addCount: number; skipCount: number; errorCount: number };
 
 export const MAX_IMPORT_LINES = 2000;
@@ -16,7 +17,6 @@ const HEADER_ALIASES: Record<Field, string[]> = {
 };
 const REQUIRED: Field[] = ['code', 'name', 'time', 'teacher'];
 const DEFAULT_ORDER: Field[] = ['code', 'name', 'nameEn', 'time', 'teacher', 'note'];
-const FIELD_LABEL: Record<Field, string> = { code: '科號', name: '中文課名', nameEn: '英文課名', time: '上課時間', teacher: '教師', note: '備註' };
 
 function splitCsv(line: string): string[] {
   const out: string[] = []; let cur = ''; let q = false;
@@ -44,13 +44,13 @@ function headerMap(cells: string[]): Partial<Record<Field, number>> | null {
     }
   });
   const missing = REQUIRED.filter(f => map[f] === undefined);
-  if (missing.length) throw new Error(`標題列缺少欄位：${missing.map(f => FIELD_LABEL[f]).join('、')}`);
+  if (missing.length) throw new AppError('headerMissing', { fields: missing });
   return map;
 }
 
 export function parseCourseImport(text: string): ParsedRow[] {
   const lines = text.replace(/^﻿/, '').split(/\r?\n/);
-  if (lines.length > MAX_IMPORT_LINES) throw new Error(`一次最多匯入 ${MAX_IMPORT_LINES} 行`);
+  if (lines.length > MAX_IMPORT_LINES) throw new AppError('tooManyLines', { n: MAX_IMPORT_LINES });
   const rows: ParsedRow[] = [];
   let map: Partial<Record<Field, number>> | null = null;
   let first = true;
@@ -78,11 +78,11 @@ export function planCourseImport(db: Db, rows: ParsedRow[]): ImportPlan {
   );
   const seen = new Set<string>();
   const out: PlanRow[] = rows.map(r => {
-    if (!COURSE_CODE_RE.test(r.code)) return { ...r, status: 'error', reason: COURSE_CODE_ERROR };
-    if (!r.name || !r.teacher || !r.time) return { ...r, status: 'error', reason: '課名、授課教師、上課時間皆必填' };
-    if (seen.has(r.code)) return { ...r, status: 'error', reason: '同批內科號重複' };
+    if (!COURSE_CODE_RE.test(r.code)) return { ...r, status: 'error', reason: 'courseCodeFormat' };
+    if (!r.name || !r.teacher || !r.time) return { ...r, status: 'error', reason: 'importFieldsRequired' };
+    if (seen.has(r.code)) return { ...r, status: 'error', reason: 'duplicateInBatch' };
     seen.add(r.code);
-    if (existing.has(r.code)) return { ...r, status: 'skip', reason: '科號已存在' };
+    if (existing.has(r.code)) return { ...r, status: 'skip', reason: 'codeExistsSkip' };
     return { ...r, status: 'add' };
   });
   return {
@@ -94,7 +94,7 @@ export function planCourseImport(db: Db, rows: ParsedRow[]): ImportPlan {
 }
 
 export function applyCourseImport(db: Db, plan: ImportPlan): number {
-  if (plan.errorCount > 0) throw new Error('匯入內容有錯誤，請先修正');
+  if (plan.errorCount > 0) throw new AppError('importHasErrors');
   return db.transaction((tx) => {
     let n = 0;
     for (const r of plan.rows) {

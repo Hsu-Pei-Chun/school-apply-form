@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDb, Db } from '@/lib/db/client';
-import { createCourse, listCourses, COURSE_CODE_ERROR } from '@/lib/courses';
+import { createCourse, listCourses } from '@/lib/courses';
 import { parseCourseImport, planCourseImport, applyCourseImport, MAX_IMPORT_LINES } from '@/lib/course-import';
 
 const C1 = '11510CHEM200104';
@@ -107,9 +107,9 @@ describe('planCourseImport', () => {
     ].join('\n'));
     const plan = planCourseImport(db, rows);
     expect(plan.rows.map(r => r.status)).toEqual(['add', 'skip', 'error', 'error', 'error']);
-    expect((plan.rows[2] as { reason: string }).reason).toBe(COURSE_CODE_ERROR);
-    expect((plan.rows[3] as { reason: string }).reason).toBe('課名、授課教師、上課時間皆必填');
-    expect((plan.rows[4] as { reason: string }).reason).toBe('同批內科號重複');
+    expect((plan.rows[2] as { reason: string }).reason).toBe('courseCodeFormat');
+    expect((plan.rows[3] as { reason: string }).reason).toBe('importFieldsRequired');
+    expect((plan.rows[4] as { reason: string }).reason).toBe('duplicateInBatch');
     expect(plan).toMatchObject({ addCount: 1, skipCount: 1, errorCount: 3 });
   });
   it('欄位不足 → error', () => {

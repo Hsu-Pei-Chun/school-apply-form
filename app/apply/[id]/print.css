@@ -35,8 +35,7 @@ main:has(> .print-wrap) { max-width: none; }
 .signatures span { display: block; font-size: 10pt; margin-bottom: 8mm; }
 .signatures .line { border-bottom: 1px solid #000; min-height: 8mm; padding-bottom: 1mm; }
 .sheet-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; margin-top: 10mm; }
-.note { font-size: 10pt; color: #333; max-width: 70%; }
-.serial { font-family: ui-monospace, monospace; font-size: 9pt; color: #333; }
+.note { font-size: 10pt; color: #333; }
 
 @media (max-width: 640px) {
   .sheet-head { flex-direction: column; }

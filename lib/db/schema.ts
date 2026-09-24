@@ -59,3 +59,9 @@ export const applicationCoursesA = sqliteTable(
 export type Course = typeof courses.$inferSelect;
 export type Application = typeof applications.$inferSelect;
 export type ApplicationCourseA = typeof applicationCoursesA.$inferSelect;
+
+// 可由管理員修改的申請表文字（同意事項、送交說明）；沒有資料列時使用 lib/form-settings.ts 的預設值。
+export const formSettings = sqliteTable('form_settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+});

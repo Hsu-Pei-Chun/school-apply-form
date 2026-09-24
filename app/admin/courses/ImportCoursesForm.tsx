@@ -5,12 +5,16 @@ import Badge from '@/components/Badge';
 import Button from '@/components/Button';
 import { UploadIcon } from '@/components/icons';
 import type { ImportPlan, PlanRow } from '@/lib/course-import';
+import { dict, Locale } from '@/lib/i18n';
+import { msg } from '@/lib/messages';
 import { previewImport, confirmImport } from './actions';
 
 const TONE: Record<PlanRow['status'], 'success' | 'warning' | 'danger'> = { add: 'success', skip: 'warning', error: 'danger' };
-const LABEL: Record<PlanRow['status'], string> = { add: '新增', skip: '已存在，略過', error: '錯誤' };
 
-export default function ImportCoursesForm() {
+export default function ImportCoursesForm({ locale }: { locale: Locale }) {
+  const d = dict(locale).courses;
+  const t = d.import;
+  const LABEL: Record<PlanRow['status'], string> = { add: t.statusAdd, skip: t.statusSkip, error: t.statusError };
   const [text, setText] = useState('');
   const [plan, setPlan] = useState<ImportPlan | null>(null);
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
@@ -39,7 +43,7 @@ export default function ImportCoursesForm() {
     startTransition(async () => {
       const r = await confirmImport(text);
       if ('error' in r) { setMessage({ kind: 'error', text: r.error }); return; }
-      setMessage({ kind: 'ok', text: `已匯入 ${r.imported} 筆` });
+      setMessage({ kind: 'ok', text: t.imported(r.imported) });
       setText(''); setPlan(null);
       if (fileRef.current) fileRef.current.value = '';
     });
@@ -48,21 +52,21 @@ export default function ImportCoursesForm() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="import-text" className="text-sm font-medium">貼上 Excel 內容</label>
+        <label htmlFor="import-text" className="text-sm font-medium">{t.pasteLabel}</label>
         <textarea id="import-text" className="input min-h-40 font-mono text-sm" value={text}
           onChange={e => { setText(e.target.value); setPlan(null); setMessage(null); }}
-          placeholder={'科號\t中文課名\t英文課名\t上課時間\t教師\t備註'} />
-        <p className="text-sm text-muted-fg">第一行請為標題列（科號、中文課名、英文課名、上課時間、教師、備註，順序不限；英文課名、備註可省略）；Tab 或逗號分隔皆可；CSV 請以 UTF-8 儲存。</p>
+          placeholder={t.placeholder} />
+        <p className="text-sm text-muted-fg">{t.help}</p>
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="import-file" className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface px-4 text-sm hover:bg-background">
-          <UploadIcon className="size-4" /> 或上傳 CSV / TXT
+          <UploadIcon className="size-4" /> {t.upload}
         </label>
         <input id="import-file" ref={fileRef} type="file" accept=".csv,.txt,text/csv,text/plain" className="sr-only" onChange={onFile} />
-        <Button type="button" variant="secondary" onClick={onPreview} loading={pending} disabled={!text.trim()}>預覽</Button>
+        <Button type="button" variant="secondary" onClick={onPreview} loading={pending} disabled={!text.trim()}>{t.preview}</Button>
         {plan && (
           <Button type="button" variant="primary" onClick={onConfirm} loading={pending} disabled={plan.errorCount > 0 || plan.addCount === 0}>
-            確認匯入 {plan.addCount} 筆{plan.skipCount > 0 ? `（略過 ${plan.skipCount} 筆）` : ''}
+            {t.confirm(plan.addCount, plan.skipCount)}
           </Button>
         )}
       </div>
@@ -75,11 +79,11 @@ export default function ImportCoursesForm() {
       )}
 
       {plan && plan.errorCount > 0 && (
-        <p role="alert" className="text-sm text-danger">有 {plan.errorCount} 行錯誤，請修正後重新預覽。</p>
+        <p role="alert" className="text-sm text-danger">{t.errors(plan.errorCount)}</p>
       )}
 
       {plan && plan.rows.length === 0 && (
-        <p className="text-sm text-muted-fg">沒有可解析的資料。</p>
+        <p className="text-sm text-muted-fg">{t.empty}</p>
       )}
 
       {plan && plan.rows.length > 0 && (
@@ -87,14 +91,14 @@ export default function ImportCoursesForm() {
           <table className="w-full text-sm">
             <thead className="bg-background text-left text-muted-fg">
               <tr>
-                <th className="px-3 py-2 font-semibold">行</th>
-                <th className="px-3 py-2 font-semibold">科號</th>
-                <th className="px-3 py-2 font-semibold">課名</th>
-                <th className="px-3 py-2 font-semibold">英文課名</th>
-                <th className="px-3 py-2 font-semibold">教師</th>
-                <th className="px-3 py-2 font-semibold">時間</th>
-                <th className="px-3 py-2 font-semibold">備註</th>
-                <th className="px-3 py-2 font-semibold">結果</th>
+                <th className="px-3 py-2 font-semibold">{t.line}</th>
+                <th className="px-3 py-2 font-semibold">{d.code}</th>
+                <th className="px-3 py-2 font-semibold">{d.name}</th>
+                <th className="px-3 py-2 font-semibold">{d.nameEn}</th>
+                <th className="px-3 py-2 font-semibold">{d.teacher}</th>
+                <th className="px-3 py-2 font-semibold">{d.time}</th>
+                <th className="px-3 py-2 font-semibold">{d.note}</th>
+                <th className="px-3 py-2 font-semibold">{t.result}</th>
               </tr>
             </thead>
             <tbody>
@@ -109,7 +113,7 @@ export default function ImportCoursesForm() {
                   <td className="px-3 py-2">{r.note}</td>
                   <td className="px-3 py-2">
                     <Badge tone={TONE[r.status]}>{LABEL[r.status]}</Badge>
-                    {r.status !== 'add' && <span className="ml-2 text-muted-fg">{r.reason}</span>}
+                    {r.status !== 'add' && <span className="ml-2 text-muted-fg">{msg(locale, r.reason)}</span>}
                   </td>
                 </tr>
               ))}

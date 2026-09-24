@@ -2,18 +2,15 @@
 
 import Button from '@/components/Button';
 import { PlusIcon, TrashIcon } from '@/components/icons';
+import { dict, Locale } from '@/lib/i18n';
 
 export type CourseARow = { key: number; code: string; name: string; time: string; teacher: string };
-const FIELDS: Array<{ f: keyof Omit<CourseARow, 'key'>; label: string; hint: string }> = [
-  { f: 'code', label: '科號（課號）', hint: '例：EE201001' },
-  { f: 'name', label: '課名', hint: '例：電路學' },
-  { f: 'time', label: '上課時間', hint: '例：M3M4' },
-  { f: 'teacher', label: '任課教師', hint: '例：林教授' },
-];
+const FIELDS: Array<keyof Omit<CourseARow, 'key'>> = ['code', 'name', 'time', 'teacher'];
 
-type Props = { rows: CourseARow[]; max: number; onChange: (rows: CourseARow[]) => void };
+type Props = { rows: CourseARow[]; max: number; onChange: (rows: CourseARow[]) => void; locale: Locale };
 
-export default function CourseARows({ rows, max, onChange }: Props) {
+export default function CourseARows({ rows, max, onChange, locale }: Props) {
+  const t = dict(locale).apply;
   function update(i: number, f: keyof Omit<CourseARow, 'key'>, v: string) {
     onChange(rows.map((r, idx) => (idx === i ? { ...r, [f]: v } : r)));
   }
@@ -28,18 +25,19 @@ export default function CourseARows({ rows, max, onChange }: Props) {
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-1 text-sm font-medium">一般課程 A（至少一門，最多 {max} 門；校內或校外課程皆可）</legend>
+      <legend className="mb-1 text-sm font-medium">{t.courseALegend(max)}</legend>
       {rows.map((r, i) => (
         <div key={r.key} className="rounded-[var(--radius-card)] border border-border bg-background/60 p-4">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-fg">第 {i + 1} 門</span>
-            <Button type="button" variant="danger" className="min-h-11 px-3 text-xs" onClick={() => remove(i)} disabled={rows.length <= 1} aria-label={`刪除第 ${i + 1} 門`}>
-              <TrashIcon className="size-4" /> 刪除
+            <span className="text-sm font-medium text-muted-fg">{t.courseANth(i + 1)}</span>
+            <Button type="button" variant="danger" className="min-h-11 px-3 text-xs" onClick={() => remove(i)} disabled={rows.length <= 1} aria-label={t.removeNth(i + 1)}>
+              <TrashIcon className="size-4" /> {t.remove}
             </Button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {FIELDS.map(({ f, label, hint }) => {
+            {FIELDS.map(f => {
               const id = `courseA-${i}-${f}`;
+              const { label, hint } = t.courseAFields[f];
               return (
                 <div key={f} className="flex flex-col gap-1.5">
                   <label htmlFor={id} className="text-sm font-medium">{label}</label>
@@ -51,7 +49,7 @@ export default function CourseARows({ rows, max, onChange }: Props) {
         </div>
       ))}
       <Button type="button" variant="secondary" onClick={add} disabled={rows.length >= max} className="self-start">
-        <PlusIcon className="size-4" /> 新增一門
+        <PlusIcon className="size-4" /> {t.add}
       </Button>
     </fieldset>
   );

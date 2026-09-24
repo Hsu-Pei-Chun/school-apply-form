@@ -5,6 +5,8 @@ import { getDb } from '@/lib/db/client';
 import { requireAdmin } from '@/lib/admin-auth';
 import { createCourse, setCourseActive } from '@/lib/courses';
 import { parseCourseImport, planCourseImport, applyCourseImport, ImportPlan } from '@/lib/course-import';
+import { getLocale } from '@/lib/locale';
+import { errorText, msg } from '@/lib/messages';
 
 export async function addCourse(formData: FormData): Promise<{ error: string } | void> {
   await requireAdmin();
@@ -14,11 +16,11 @@ export async function addCourse(formData: FormData): Promise<{ error: string } |
   const teacher = String(formData.get('teacher') ?? '').trim();
   const time = String(formData.get('time') ?? '').trim();
   const note = String(formData.get('note') ?? '').trim();
-  if (!code || !name || !teacher || !time) return { error: '代碼、名稱、授課教師、上課時間皆必填' };
+  if (!code || !name || !teacher || !time) return { error: msg(await getLocale(), 'courseFieldsRequired') };
   try {
     createCourse(getDb(), { code, name, nameEn, teacher, time, note });
   } catch (e) {
-    return { error: (e as Error).message };
+    return { error: errorText(await getLocale(), e) };
   }
   revalidatePath('/admin/courses');
 }
@@ -36,7 +38,7 @@ export async function previewImport(text: string): Promise<ImportPlan | { error:
   try {
     return planCourseImport(getDb(), parseCourseImport(String(text ?? '')));
   } catch (e) {
-    return { error: (e as Error).message };
+    return { error: errorText(await getLocale(), e) };
   }
 }
 
@@ -50,6 +52,6 @@ export async function confirmImport(text: string): Promise<{ imported: number } 
     revalidatePath('/apply');
     return { imported };
   } catch (e) {
-    return { error: (e as Error).message };
+    return { error: errorText(await getLocale(), e) };
   }
 }
