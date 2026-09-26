@@ -20,7 +20,7 @@ export default function AddCourseForm({ locale }: { locale: Locale }) {
   }
 
   return (
-    <form action={onSubmit} className="grid gap-4 sm:grid-cols-3 sm:items-end">
+    <form action={onSubmit} className="grid gap-4 sm:grid-cols-3 sm:items-start">
       <Field id="code" label={t.code} hint={t.codeHint}>
         <input id="code" name="code" className="input font-mono" maxLength={15} minLength={15} pattern="[0-9A-Za-z ]{15}" required />
       </Field>
