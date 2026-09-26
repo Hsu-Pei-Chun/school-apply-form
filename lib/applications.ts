@@ -1,5 +1,5 @@
 import { eq, desc, asc, and, SQL } from 'drizzle-orm';
-import { Db } from './db/client';
+import { Db, Executor, isUniqueViolation } from './db/client';
 import { applications, applicationCoursesA, courses, Application, ApplicationCourseA } from './db/schema';
 import { DEGREES, Degree } from './degrees';
 import { AppError } from './messages';
@@ -33,8 +33,8 @@ export const MAX_COURSES_A = 5;
 export const MAX_APPLICANT_FIELD = 50;
 export const STUDENT_ID_RE = /^\d{9}$/;
 
-export function nextApplicationId(db: Db): string {
-  const last = db.select({ id: applications.id }).from(applications).orderBy(desc(applications.id)).limit(1).get();
+export async function nextApplicationId(db: Executor): Promise<string> {
+  const last = await db.select({ id: applications.id }).from(applications).orderBy(desc(applications.id)).limit(1).get();
   const n = last ? parseInt(last.id.slice(1), 10) + 1 : 1;
   return 'A' + String(n).padStart(6, '0');
 }
@@ -44,8 +44,8 @@ export function makeBarcode(studentId: string, courseBCode: string): string {
   return `${studentId}-${courseBCode}-B`;
 }
 
-function assertActiveCourse(db: Db, code: string): void {
-  const c = db.select().from(courses).where(eq(courses.code, code)).get();
+async function assertActiveCourse(db: Executor, code: string): Promise<void> {
+  const c = await db.select().from(courses).where(eq(courses.code, code)).get();
   if (!c || c.isActive !== 1) throw new AppError('courseUnavailable');
 }
 
@@ -77,49 +77,51 @@ function normalizeCoursesA(input: CourseAInput[]): CourseAInput[] {
   return rows;
 }
 
-function findExistingId(db: Db, studentId: string, courseBCode: string): string | undefined {
-  return db
+async function findExistingId(db: Executor, studentId: string, courseBCode: string): Promise<string | undefined> {
+  const row = await db
     .select({ id: applications.id })
     .from(applications)
     .where(and(eq(applications.studentId, studentId), eq(applications.courseBCode, courseBCode)))
-    .get()?.id;
+    .get();
+  return row?.id;
 }
 
-export function createApplication(db: Db, input: CreateApplicationInput): Application {
+export async function createApplication(db: Db, input: CreateApplicationInput): Promise<Application> {
   const applicant = normalizeApplicant(input);
   const coursesA = normalizeCoursesA(input.coursesA);
-  assertActiveCourse(db, input.courseBCode);
+  await assertActiveCourse(db, input.courseBCode);
 
-  const existing = findExistingId(db, applicant.studentId, input.courseBCode);
+  const existing = await findExistingId(db, applicant.studentId, input.courseBCode);
   if (existing) throw new DuplicateApplicationError(existing);
 
   try {
-    return db.transaction((tx) => {
+    // libsql 交易預設為寫入模式（BEGIN IMMEDIATE），流水號在鎖內取得，不會兩筆拿到同一號
+    return await db.transaction(async (tx) => {
       const row: Application = {
-        id: nextApplicationId(tx),
+        id: await nextApplicationId(tx),
         ...applicant,
         courseBCode: input.courseBCode,
         barcode: makeBarcode(applicant.studentId, input.courseBCode),
         createdAt: new Date().toISOString(),
       };
-      tx.insert(applications).values(row).run();
-      tx.insert(applicationCoursesA).values(coursesA.map((c, i) => ({ applicationId: row.id, seq: i + 1, ...c }))).run();
+      await tx.insert(applications).values(row).run();
+      await tx.insert(applicationCoursesA).values(coursesA.map((c, i) => ({ applicationId: row.id, seq: i + 1, ...c }))).run();
       return row;
     });
   } catch (e) {
     // 兩個請求同時通過上面的 existing 檢查、幾乎同時 insert 時，其中一個會在這裡撞到
     // applications_student_course_uq（或 applications_barcode_uq）。此時重新查一次既有
-    // id，轉成跟一般重複申請同樣的 DuplicateApplicationError，而不是讓 SqliteError 外洩。
-    if ((e as { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE') {
-      const raced = findExistingId(db, applicant.studentId, input.courseBCode);
+    // id，轉成跟一般重複申請同樣的 DuplicateApplicationError，而不是讓資料庫錯誤外洩。
+    if (isUniqueViolation(e)) {
+      const raced = await findExistingId(db, applicant.studentId, input.courseBCode);
       if (raced) throw new DuplicateApplicationError(raced);
     }
     throw e;
   }
 }
 
-function loadDetail(db: Db, where: SQL): ApplicationDetail | undefined {
-  const row = db
+async function loadDetail(db: Db, where: SQL): Promise<ApplicationDetail | undefined> {
+  const row = await db
     .select({
       id: applications.id,
       studentId: applications.studentId,
@@ -140,11 +142,11 @@ function loadDetail(db: Db, where: SQL): ApplicationDetail | undefined {
     .where(where)
     .get();
   if (!row) return undefined;
-  const coursesA = db.select().from(applicationCoursesA)
+  const coursesA = await db.select().from(applicationCoursesA)
     .where(eq(applicationCoursesA.applicationId, row.id)).orderBy(asc(applicationCoursesA.seq)).all();
   return { ...row, coursesA };
 }
 
-export function getApplication(db: Db, id: string): ApplicationDetail | undefined {
+export async function getApplication(db: Db, id: string): Promise<ApplicationDetail | undefined> {
   return loadDetail(db, eq(applications.id, id));
 }

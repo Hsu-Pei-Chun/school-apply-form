@@ -13,7 +13,7 @@ export async function saveSettings(formData: FormData): Promise<Result> {
   await requireAdmin('/admin/settings');
   const field = (name: string) => String(formData.get(name) ?? '');
   try {
-    const values = saveFormSettings(getDb(), {
+    const values = await saveFormSettings(await getDb(), {
       termsZh: field('termsZh'), termsEn: field('termsEn'),
       submitNoteZh: field('submitNoteZh'), submitNoteEn: field('submitNoteEn'),
     });
@@ -26,8 +26,8 @@ export async function saveSettings(formData: FormData): Promise<Result> {
 
 export async function resetSettings(): Promise<Result> {
   await requireAdmin('/admin/settings');
-  const db = getDb();
-  resetFormSettings(db);
+  const db = await getDb();
+  await resetFormSettings(db);
   revalidatePath('/apply', 'layout');
-  return { ok: true, values: getFormSettings(db) };
+  return { ok: true, values: await getFormSettings(db) };
 }

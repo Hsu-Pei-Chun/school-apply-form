@@ -23,14 +23,14 @@ export async function submitApplication(formData: FormData): Promise<{ error: st
   const field = (name: string) => String(formData.get(name) ?? '');
   let id: string;
   try {
-    id = createApplication(getDb(), {
+    id = (await createApplication(await getDb(), {
       studentId: field('studentId'),
       studentName: field('studentName'),
       department: field('department'),
       degree: field('degree'),
       coursesA: parseCoursesA(formData),
       courseBCode: field('courseBCode'),
-    }).id;
+    })).id;
   } catch (e) {
     const error = errorText(await getLocale(), e);
     return e instanceof DuplicateApplicationError ? { error, existingId: e.existingId } : { error };

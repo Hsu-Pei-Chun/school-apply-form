@@ -10,7 +10,7 @@ const C2 = '11510CHEM200114';
 const C3 = '11510MATH200124';
 
 let db: Db;
-beforeEach(() => { db = createDb(':memory:'); });
+beforeEach(async () => { db = await createDb(':memory:'); });
 
 describe('parseCourseImport', () => {
   it('Tab 分隔、跳過標題列與空行、處理 CRLF 與 BOM', () => {
@@ -73,12 +73,12 @@ describe('標題列對應', () => {
 });
 
 describe('備註欄', () => {
-  it('標題含「備註」時對應到 note，並隨匯入寫入課程', () => {
+  it('標題含「備註」時對應到 note，並隨匯入寫入課程', async () => {
     const text = '科號\t中文課名\t英文課名\t任課教師\t上課時間\t備註\n11510AIA 200100\t統計學\tStatistics\t李宗穎\tW2W3W4\t限大學部';
     const rows = parseCourseImport(text);
     expect(rows[0]).toMatchObject({ code: '11510AIA 200100', teacher: '李宗穎', time: 'W2W3W4', note: '限大學部' });
-    applyCourseImport(db, planCourseImport(db, rows));
-    expect(listCourses(db)[0].note).toBe('限大學部');
+    await applyCourseImport(db, await planCourseImport(db, rows));
+    expect((await listCourses(db))[0].note).toBe('限大學部');
   });
   it('無標題時第 6 欄為備註；缺少時為空字串', () => {
     expect(parseCourseImport('11510AIA 200100\t統計學\tStatistics\tW2W3W4\t李宗穎\t需自備筆電')[0].note).toBe('需自備筆電');
@@ -95,8 +95,8 @@ describe('CSV 引號', () => {
 });
 
 describe('planCourseImport', () => {
-  it('正常行 add；已存在 skip；格式錯誤 error；同批重複 error', () => {
-    createCourse(db, { code: C2, name: '既有', teacher: '王', time: 'M1M2' });
+  it('正常行 add；已存在 skip；格式錯誤 error；同批重複 error', async () => {
+    await createCourse(db, { code: C2, name: '既有', teacher: '王', time: 'M1M2' });
     const rows = parseCourseImport([
       '科號\t中文課名\t英文課名\t上課時間\t教師',
       `${C1}\t線性代數1\t\tM1M2\t許教授`,
@@ -105,64 +105,75 @@ describe('planCourseImport', () => {
       `${C3}\t\t\tM1M2\t許教授`,
       `${C1}\t重複\t\tM1M2\t許教授`,
     ].join('\n'));
-    const plan = planCourseImport(db, rows);
+    const plan = await planCourseImport(db, rows);
     expect(plan.rows.map(r => r.status)).toEqual(['add', 'skip', 'error', 'error', 'error']);
     expect((plan.rows[2] as { reason: string }).reason).toBe('courseCodeFormat');
     expect((plan.rows[3] as { reason: string }).reason).toBe('importFieldsRequired');
     expect((plan.rows[4] as { reason: string }).reason).toBe('duplicateInBatch');
     expect(plan).toMatchObject({ addCount: 1, skipCount: 1, errorCount: 3 });
   });
-  it('欄位不足 → error', () => {
-    const plan = planCourseImport(db, parseCourseImport(`${C1}\t線性代數1`));
+  it('欄位不足 → error', async () => {
+    const plan = await planCourseImport(db, parseCourseImport(`${C1}\t線性代數1`));
     expect(plan.rows[0].status).toBe('error');
   });
 });
 
 describe('applyCourseImport', () => {
-  it('只寫入 add 行並回傳筆數；skip 不覆蓋既有', () => {
-    createCourse(db, { code: C2, name: '既有', teacher: '王', time: 'M1M2' });
-    const plan = planCourseImport(db, parseCourseImport([
+  it('只寫入 add 行並回傳筆數；skip 不覆蓋既有', async () => {
+    await createCourse(db, { code: C2, name: '既有', teacher: '王', time: 'M1M2' });
+    const plan = await planCourseImport(db, parseCourseImport([
       '科號\t中文課名\t英文課名\t上課時間\t教師',
       `${C1}\t線性代數1\t\tM1M2\t許教授`,
       `${C2}\t新名\t\tT3T4\t新師`,
       `${C3}\t線代3\t\tW5W6\t李`,
     ].join('\n')));
-    expect(applyCourseImport(db, plan)).toBe(2);
-    const all = listCourses(db);
+    expect(await applyCourseImport(db, plan)).toBe(2);
+    const all = await listCourses(db);
     expect(all.map(c => c.code)).toEqual([C1, C2, C3]);
     expect(all.find(c => c.code === C2)?.name).toBe('既有');
   });
-  it('有 error 行時拒絕整批', () => {
-    const plan = planCourseImport(db, parseCourseImport([
+  it('有 error 行時拒絕整批', async () => {
+    const plan = await planCourseImport(db, parseCourseImport([
       '科號\t中文課名\t英文課名\t上課時間\t教師',
       `${C1}\t線性代數1\t\tM1M2\t許教授`,
       `C001\t壞\t\tM1M2\t王`,
     ].join('\n')));
-    expect(() => applyCourseImport(db, plan)).toThrow('匯入內容有錯誤，請先修正');
-    expect(listCourses(db)).toHaveLength(0);
+    await expect(applyCourseImport(db, plan)).rejects.toThrow('匯入內容有錯誤，請先修正');
+    expect(await listCourses(db)).toHaveLength(0);
   });
-  it('寫入途中若科號已被併發插入則整批回滾', () => {
-    const plan = planCourseImport(db, parseCourseImport([
+  it('寫入途中若科號已被併發插入則整批回滾', async () => {
+    const plan = await planCourseImport(db, parseCourseImport([
       '科號\t中文課名\t英文課名\t上課時間\t教師',
       `${C1}\t線性代數1\t\tM1M2\t許教授`,
       `${C3}\t線代3\t\tW5W6\t李`,
     ].join('\n')));
-    createCourse(db, { code: C3, name: '併發插入', teacher: '陳', time: 'M1M2' });
-    expect(() => applyCourseImport(db, plan)).toThrow('課程代碼已存在');
-    expect(listCourses(db).map(c => c.code)).toEqual([C3]);
+    await createCourse(db, { code: C3, name: '併發插入', teacher: '陳', time: 'M1M2' });
+    await expect(applyCourseImport(db, plan)).rejects.toThrow('課程代碼已存在');
+    expect((await listCourses(db)).map(c => c.code)).toEqual([C3]);
+  });
+});
+
+describe('大量匯入', () => {
+  it('超過 500 筆（單次查詢參數分批）仍能正確判斷已存在的科號', async () => {
+    const codes = Array.from({ length: 1200 }, (_, i) => `11510BULK${String(i).padStart(6, '0')}`);
+    await createCourse(db, { code: codes[1100], name: '既有', teacher: '王', time: 'M1' });
+    const plan = await planCourseImport(db, parseCourseImport(codes.map(c => `${c}\t課\t\tM1\t王`).join('\n')));
+    expect(plan).toMatchObject({ addCount: 1199, skipCount: 1, errorCount: 0 });
+    expect(plan.rows[1100].status).toBe('skip');
   });
 });
 
 describe('校方真實檔案', () => {
-  it('54 筆全部為 add，科號空格保留', () => {
+  it('54 筆全部為 add，科號空格保留', async () => {
     const text = readFileSync(path.join(__dirname, 'fixtures/xclass-11510.tsv'), 'utf-8');
-    const plan = planCourseImport(db, parseCourseImport(text));
+    const plan = await planCourseImport(db, parseCourseImport(text));
     expect(plan.rows).toHaveLength(54);
     expect(plan.errorCount).toBe(0);
     expect(plan.addCount).toBe(54);
     expect(plan.rows.find(r => r.code === '11510CS  110400')).toBeTruthy();
-    expect(applyCourseImport(db, plan)).toBe(54);
-    expect(listCourses(db).find(c => c.code === '11510AIA 200100')?.teacher).toBe('台大李宗穎,周瑞賢');
-    expect(listCourses(db).find(c => c.code === '11510AIA 200100')?.nameEn).toBe('Statistics with Recitation--NTU');
+    expect(await applyCourseImport(db, plan)).toBe(54);
+    const all = await listCourses(db);
+    expect(all.find(c => c.code === '11510AIA 200100')?.teacher).toBe('台大李宗穎,周瑞賢');
+    expect(all.find(c => c.code === '11510AIA 200100')?.nameEn).toBe('Statistics with Recitation--NTU');
   });
 });

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function ApplyPage() {
   const locale = await getLocale();
   const t = dict(locale).apply;
-  const courses = listActiveCourses(getDb()).map(c => ({ code: c.code, name: c.name, nameEn: c.nameEn, teacher: c.teacher, time: c.time, note: c.note }));
+  const courses = (await listActiveCourses(await getDb())).map(c => ({ code: c.code, name: c.name, nameEn: c.nameEn, teacher: c.teacher, time: c.time, note: c.note }));
 
   return (
     <>
