@@ -15,7 +15,7 @@ const zh = {
   site: {
     title: '課程申請表系統',
     description: '學生填寫資料申請 X-Class 課程、列印含條碼申請表',
-    brand: '國立○○大學 課程申請表系統',
+    brand: '國立清華大學 課程申請表系統',
     navLabel: '主選單',
     navApply: '學生申請',
     navCourses: '課程管理',
@@ -62,7 +62,7 @@ const zh = {
   print: {
     back: '回申請頁',
     print: '列印申請表',
-    title: '國立○○大學　X-Class 課程修課申請表',
+    title: '國立清華大學　X-Class 課程修課申請表',
     subtitle: 'NTHU X-Class Application Form　　115 學年度上學期',
     barcode: '條碼',
     s1: '一、申請人',
@@ -159,7 +159,7 @@ const en: Dict = {
   site: {
     title: 'Course Application System',
     description: 'Apply for X-Class courses and print a barcoded application form',
-    brand: 'Course Application System',
+    brand: 'NTHU Course Application System',
     navLabel: 'Main menu',
     navApply: 'Apply',
     navCourses: 'Courses',
@@ -206,7 +206,7 @@ const en: Dict = {
   print: {
     back: 'Back',
     print: 'Print Form',
-    title: 'X-Class Course Application Form',
+    title: 'National Tsing Hua University　X-Class Course Application Form',
     subtitle: 'NTHU X-Class Application Form　　Fall Semester, Academic Year 2026–27',
     barcode: 'Barcode',
     s1: '1. Applicant',
