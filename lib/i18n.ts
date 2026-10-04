@@ -29,7 +29,7 @@ const zh = {
     applyTitle: '學生申請',
     applyDesc: '填寫申請人資料、一般課程與 X-Class 課程，產生含條碼的申請表',
     coursesTitle: '課程管理',
-    coursesDesc: '新增、匯入、停用課程（需管理員登入）',
+    coursesDesc: '新增、匯入、停用、刪除課程（需管理員登入）',
   },
   degrees: { 大學部: '大學部', 碩士班: '碩士班', 博士班: '博士班', 在職專班: '在職專班' } satisfies Record<Degree, string>,
   apply: {
@@ -95,7 +95,7 @@ const zh = {
   },
   courses: {
     title: '課程管理',
-    intro: '批次匯入或逐筆新增課程，並可停用。停用的課程不會出現在學生申請頁，但既有申請單仍可查詢。',
+    intro: '批次匯入或逐筆新增課程，並可停用或刪除。停用的課程不會出現在學生申請頁，但既有申請單仍可查詢；已有申請單的課程無法刪除，請改用停用。',
     importTitle: '批次匯入',
     addTitle: '逐筆新增',
     code: '代碼',
@@ -110,6 +110,13 @@ const zh = {
     inactive: '停用',
     enable: '啟用',
     disable: '停用',
+    selectAll: '全選',
+    selectRow: (code: string) => `選取 ${code}`,
+    selected: (n: number) => `已選取 ${n} 筆`,
+    deleteSelected: (n: number) => `刪除選取（${n}）`,
+    confirmDelete: (n: number) => `確定要刪除 ${n} 筆課程嗎？此動作無法復原。`,
+    deleted: (n: number) => `已刪除 ${n} 筆`,
+    inUse: (codes: string[]) => `${codes.length} 筆已有申請單，無法刪除（請改用停用）：${codes.join('、')}`,
     add: {
       code: '科號（15 碼）',
       codeHint: '例：11510AIA 500700（含空格補位，共 15 碼）',
@@ -173,7 +180,7 @@ const en: Dict = {
     applyTitle: 'Apply',
     applyDesc: 'Enter your details, regular courses and an X-Class course to generate a barcoded application form',
     coursesTitle: 'Course Management',
-    coursesDesc: 'Add, import and disable courses (admin login required)',
+    coursesDesc: 'Add, import, disable and delete courses (admin login required)',
   },
   degrees: { 大學部: 'Undergraduate', 碩士班: "Master's", 博士班: 'Doctoral', 在職專班: "In-service Master's" },
   apply: {
@@ -239,7 +246,7 @@ const en: Dict = {
   },
   courses: {
     title: 'Course Management',
-    intro: 'Import or add courses, and disable them when needed. Disabled courses are hidden from the application page; existing applications remain viewable.',
+    intro: 'Import or add courses, and disable or delete them when needed. Disabled courses are hidden from the application page; existing applications remain viewable. Courses with existing applications cannot be deleted — disable them instead.',
     importTitle: 'Bulk Import',
     addTitle: 'Add a Course',
     code: 'Course No.',
@@ -254,6 +261,13 @@ const en: Dict = {
     inactive: 'Disabled',
     enable: 'Enable',
     disable: 'Disable',
+    selectAll: 'Select all',
+    selectRow: (code: string) => `Select ${code}`,
+    selected: (n: number) => `${n} selected`,
+    deleteSelected: (n: number) => `Delete selected (${n})`,
+    confirmDelete: (n: number) => `Delete ${n} course${n === 1 ? '' : 's'}? This cannot be undone.`,
+    deleted: (n: number) => `Deleted ${n} course${n === 1 ? '' : 's'}`,
+    inUse: (codes: string[]) => `${codes.length} course${codes.length === 1 ? ' has' : 's have'} existing applications and cannot be deleted (disable instead): ${codes.join(', ')}`,
     add: {
       code: 'Course No. (15 chars)',
       codeHint: 'e.g. 11510AIA 500700 (padded with spaces to 15 chars)',

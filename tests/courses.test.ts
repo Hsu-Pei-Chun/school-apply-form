@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createDb, Db } from '@/lib/db/client';
-import { createCourse, listCourses, listActiveCourses, setCourseActive } from '@/lib/courses';
+import { createCourse, deleteCourses, listCourses, listActiveCourses, setCourseActive } from '@/lib/courses';
+import { createApplication } from '@/lib/applications';
 
 let db: Db;
 beforeEach(async () => { db = await createDb(':memory:'); });
@@ -66,5 +67,33 @@ describe('courses', () => {
   it('新增後 time 可讀回', async () => {
     await createCourse(db, { code: '11510EECS200101', name: '微積分', teacher: '王教授', time: 'T1T2R1R2' });
     expect((await listCourses(db))[0].time).toBe('T1T2R1R2');
+  });
+});
+
+describe('deleteCourses', () => {
+  const B1 = '11510EECS200101';
+  const B2 = '11510MATH200102';
+  const B3 = '11510PHYS200103';
+  beforeEach(async () => {
+    for (const code of [B1, B2, B3]) await createCourse(db, { code, name: '課程', teacher: '教授', time: 'M1M2' });
+  });
+
+  it('可一次刪除多筆', async () => {
+    expect(await deleteCourses(db, [B1, B3])).toEqual({ deleted: [B1, B3], inUse: [] });
+    expect((await listCourses(db)).map(x => x.code)).toEqual([B2]);
+  });
+
+  it('已有申請單的課程略過不刪，其餘照常刪除', async () => {
+    await createApplication(db, {
+      studentId: '113000001', studentName: '王小明', department: '資訊工程學系', degree: '大學部',
+      coursesA: [{ code: 'EE2010', name: '電路學', time: 'M3M4', teacher: '林教授' }], courseBCode: B2,
+    });
+    expect(await deleteCourses(db, [B1, B2, B3])).toEqual({ deleted: [B1, B3], inUse: [B2] });
+    expect((await listCourses(db)).map(x => x.code)).toEqual([B2]);
+  });
+
+  it('空清單、重複或不存在的科號不出錯', async () => {
+    expect(await deleteCourses(db, [])).toEqual({ deleted: [], inUse: [] });
+    expect(await deleteCourses(db, [B1, B1, '11510NONE000000'])).toEqual({ deleted: [B1], inUse: [] });
   });
 });

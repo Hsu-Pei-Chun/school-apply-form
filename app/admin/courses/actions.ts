@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getDb } from '@/lib/db/client';
 import { requireAdmin } from '@/lib/admin-auth';
-import { createCourse, setCourseActive } from '@/lib/courses';
+import { createCourse, deleteCourses, setCourseActive } from '@/lib/courses';
 import { parseCourseImport, planCourseImport, applyCourseImport, ImportPlan } from '@/lib/course-import';
 import { getLocale } from '@/lib/locale';
 import { errorText, msg } from '@/lib/messages';
@@ -51,6 +51,18 @@ export async function confirmImport(text: string): Promise<{ imported: number } 
     revalidatePath('/admin/courses');
     revalidatePath('/apply');
     return { imported };
+  } catch (e) {
+    return { error: errorText(await getLocale(), e) };
+  }
+}
+
+export async function deleteSelectedCourses(codes: string[]): Promise<{ deleted: number; inUse: string[] } | { error: string }> {
+  await requireAdmin();
+  try {
+    const r = await deleteCourses(await getDb(), (Array.isArray(codes) ? codes : []).map(String));
+    revalidatePath('/admin/courses');
+    revalidatePath('/apply');
+    return { deleted: r.deleted.length, inUse: r.inUse };
   } catch (e) {
     return { error: errorText(await getLocale(), e) };
   }
