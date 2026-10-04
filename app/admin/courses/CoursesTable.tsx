@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import Badge from '@/components/Badge';
 import Button from '@/components/Button';
-import Card from '@/components/Card';
 import type { Course } from '@/lib/db/schema';
 import { formatDate } from '@/lib/format';
 import { dict, Locale } from '@/lib/i18n';
@@ -55,67 +54,76 @@ export default function CoursesTable({ locale, rows }: { locale: Locale; rows: C
   }
 
   return (
-    <>
-      <div className="mb-3 flex flex-wrap items-center gap-3">
+    <section className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <h2 className="text-lg font-semibold">
+          {t.listTitle}<span className="ml-2 text-sm font-normal text-muted-fg">{t.total(rows.length)}</span>
+        </h2>
         <Button type="button" variant="danger" loading={pending} disabled={picked.length === 0} onClick={onDelete} className="text-sm">
           {t.deleteSelected(picked.length)}
         </Button>
-        {picked.length > 0 && <span className="text-sm text-muted-fg">{t.selected(picked.length)}</span>}
+        {notice && (
+          <div role={notice.tone === 'error' ? 'alert' : 'status'} className={`w-full text-sm ${notice.tone === 'error' ? 'text-danger' : 'text-success'}`}>
+            {notice.lines.map(l => <p key={l}>{l}</p>)}
+          </div>
+        )}
       </div>
-      {notice && (
-        <div role={notice.tone === 'error' ? 'alert' : 'status'} className={`mb-3 text-sm ${notice.tone === 'error' ? 'text-danger' : 'text-success'}`}>
-          {notice.lines.map(l => <p key={l}>{l}</p>)}
-        </div>
-      )}
-      <Card className="overflow-x-auto p-0">
+      <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-background text-left text-muted-fg whitespace-nowrap">
             <tr>
-              <th className="w-10 px-4 py-3">
-                <input ref={selectAllRef} type="checkbox" aria-label={t.selectAll} className="size-4 cursor-pointer align-middle"
+              <th className="w-10 py-2.5 pl-4 pr-2">
+                <input ref={selectAllRef} type="checkbox" aria-label={t.selectAll} className="size-4 cursor-pointer align-middle accent-primary"
                   checked={allChecked} onChange={toggleAll} disabled={codes.length === 0} />
               </th>
-              <th className="px-4 py-3 font-semibold">{t.code}</th>
-              <th className="px-4 py-3 font-semibold">{t.name}</th>
-              <th className="px-4 py-3 font-semibold">{t.nameEn}</th>
-              <th className="px-4 py-3 font-semibold">{t.teacher}</th>
-              <th className="px-4 py-3 font-semibold">{t.time}</th>
-              <th className="px-4 py-3 font-semibold">{t.note}</th>
-              <th className="px-4 py-3 font-semibold">{t.status}</th>
-              <th className="px-4 py-3 font-semibold">{t.created}</th>
-              {/* 表格比內容區寬，操作欄固定在右側，避免停用按鈕被捲到畫面外 */}
-              <th className="sticky right-0 bg-background px-4 py-3 shadow-[-1px_0_0_var(--color-border)]" />
+              <th className="px-3 py-2.5 font-semibold">{t.code}</th>
+              <th className="px-3 py-2.5 font-semibold">{t.name}</th>
+              <th className="px-3 py-2.5 font-semibold">{t.teacher}</th>
+              <th className="px-3 py-2.5 font-semibold">{t.time}</th>
+              <th className="px-3 py-2.5 font-semibold">{t.note}</th>
+              <th className="px-3 py-2.5 font-semibold">{t.status}</th>
+              <th className="px-3 py-2.5 font-semibold">{t.created}</th>
+              <th className="py-2.5 pl-3 pr-4" />
             </tr>
           </thead>
           <tbody>
-            {rows.map(c => (
-              <tr key={c.code} className={`border-t border-border bg-surface even:bg-background ${c.isActive ? '' : 'text-muted-fg'}`}>
-                <td className="px-4 py-2">
-                  <input type="checkbox" aria-label={t.selectRow(c.code)} className="size-4 cursor-pointer align-middle"
-                    checked={selected.has(c.code)} onChange={() => toggleOne(c.code)} />
-                </td>
-                <td className="px-4 py-2 whitespace-pre font-mono">{c.code}</td>
-                <td className="min-w-40 px-4 py-2">{c.name}</td>
-                <td className="min-w-40 px-4 py-2">{c.nameEn}</td>
-                <td className="min-w-28 px-4 py-2">{c.teacher}</td>
-                <td className="px-4 py-2 font-mono">{c.time}</td>
-                <td className="min-w-24 px-4 py-2">{c.note}</td>
-                <td className="px-4 py-2 whitespace-nowrap"><Badge tone={c.isActive ? 'success' : 'neutral'}>{c.isActive ? t.active : t.inactive}</Badge></td>
-                <td className="px-4 py-2 whitespace-nowrap">{formatDate(c.createdAt)}</td>
-                <td className="sticky right-0 bg-inherit px-4 py-2 text-right shadow-[-1px_0_0_var(--color-border)]">
-                  <form action={toggleCourse}>
-                    <input type="hidden" name="code" value={c.code} />
-                    <input type="hidden" name="isActive" value={c.isActive} />
-                    <Button type="submit" variant={c.isActive ? 'danger' : 'secondary'} className="min-h-11 whitespace-nowrap px-3 text-xs">
-                      {c.isActive ? t.disable : t.enable}
-                    </Button>
-                  </form>
-                </td>
-              </tr>
-            ))}
+            {rows.map(c => {
+              const checked = selected.has(c.code);
+              return (
+                <tr key={c.code} className={`border-t border-border align-top ${checked ? 'bg-primary/5' : 'hover:bg-background'} ${c.isActive ? '' : 'text-muted-fg'}`}>
+                  <td className="py-3 pl-4 pr-2">
+                    <input type="checkbox" aria-label={t.selectRow(c.code)} className="size-4 cursor-pointer align-middle accent-primary"
+                      checked={checked} onChange={() => toggleOne(c.code)} />
+                  </td>
+                  <td className="px-3 py-3 whitespace-pre font-mono text-xs leading-5">{c.code}</td>
+                  {/* 中英文課名合併一欄，避免欄位過多被擠壓 */}
+                  <td className="min-w-48 px-3 py-3">
+                    <div>{c.name}</div>
+                    {c.nameEn && <div className="text-xs text-muted-fg">{c.nameEn}</div>}
+                  </td>
+                  <td className="min-w-24 px-3 py-3">{c.teacher}</td>
+                  <td className="px-3 py-3 font-mono text-xs leading-5">{c.time}</td>
+                  <td className="min-w-20 px-3 py-3 text-muted-fg">{c.note}</td>
+                  <td className="px-3 py-3 whitespace-nowrap"><Badge tone={c.isActive ? 'success' : 'neutral'}>{c.isActive ? t.active : t.inactive}</Badge></td>
+                  <td className="px-3 py-3 whitespace-nowrap text-muted-fg">{formatDate(c.createdAt)}</td>
+                  <td className="py-2 pl-3 pr-4 text-right">
+                    <form action={toggleCourse}>
+                      <input type="hidden" name="code" value={c.code} />
+                      <input type="hidden" name="isActive" value={c.isActive} />
+                      <button type="submit" className={`cursor-pointer whitespace-nowrap rounded-md border px-3 py-1.5 text-xs font-medium transition-colors
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${c.isActive
+                          ? 'border-danger/40 text-danger hover:bg-danger-bg'
+                          : 'border-border text-foreground hover:bg-background'}`}>
+                        {c.isActive ? t.disable : t.enable}
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-      </Card>
-    </>
+      </div>
+    </section>
   );
 }
