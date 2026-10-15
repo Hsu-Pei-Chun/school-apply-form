@@ -12,7 +12,7 @@ export const MAX_IMPORT_LINES = 2000;
 
 type Field = 'code' | 'name' | 'nameEn' | 'time' | 'teacher' | 'note';
 const HEADER_ALIASES: Record<Field, string[]> = {
-  code: ['科號'], name: ['中文課名', '課名', '課程名稱'], nameEn: ['英文課名'], time: ['上課時間', '時間'], teacher: ['教師', '授課教師', '任課教師'],
+  code: ['科號'], name: ['中文課名', '中文名稱', '課名', '課程名稱'], nameEn: ['英文課名', '英文名稱'], time: ['上課時間', '時間'], teacher: ['教師', '授課教師', '任課教師'],
   note: ['備註'],
 };
 const REQUIRED: Field[] = ['code', 'name', 'time', 'teacher'];
