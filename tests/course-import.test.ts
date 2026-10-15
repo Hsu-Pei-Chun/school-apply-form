@@ -52,6 +52,11 @@ describe('標題列對應', () => {
     const rows = parseCourseImport(text);
     expect(rows[0]).toMatchObject({ code: '11510AIA 200100', name: '統計學--台大', nameEn: 'Statistics--NTU', time: 'W2W3W4', teacher: '台大李宗穎,周瑞賢' });
   });
+  it('校方 X-Class 檔標題（中文名稱、英文名稱、授課教師）', () => {
+    const text = '科號\t中文名稱\t英文名稱\t上課時間\t授課教師\t備註\n11510AIA 200100\t統計學暨實習--台大\tStatistics with Recitation--NTU\tW2W3W4\t周瑞賢\t請洽周老師';
+    const rows = parseCourseImport(text);
+    expect(rows[0]).toMatchObject({ code: '11510AIA 200100', name: '統計學暨實習--台大', nameEn: 'Statistics with Recitation--NTU', time: 'W2W3W4', teacher: '周瑞賢', note: '請洽周老師' });
+  });
   it('無標題時依校方 5 欄順序', () => {
     const rows = parseCourseImport('11510AIA 200100\t統計學\tStatistics\tW2W3W4\t李宗穎');
     expect(rows[0]).toMatchObject({ code: '11510AIA 200100', name: '統計學', nameEn: 'Statistics', time: 'W2W3W4', teacher: '李宗穎' });
