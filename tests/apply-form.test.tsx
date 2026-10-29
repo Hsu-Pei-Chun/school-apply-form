@@ -23,19 +23,21 @@ describe('ApplyForm', () => {
     for (const d of ['大學部', '碩士班', '博士班', '在職專班']) expect(html).toContain(`<option value="${d}">${d}</option>`);
   });
 
-  it('X-Class 課程 B 下拉選項需包含上課時間', () => {
+  it('X-Class 課程 B 為可搜尋下拉，選項需包含上課時間', () => {
     const html = renderToStaticMarkup(<ApplyForm courses={courses} maxCoursesA={5} locale="zh" />);
-    expect(html).toContain('11510EECS200101　X-Class 線代（李教授）　M1M2</option>');
+    expect(html).toContain('role="combobox"');
+    expect(html).toContain('placeholder="輸入科號、課名或教師搜尋"');
+    expect(html).toContain('11510EECS200101　X-Class 線代（李教授）　M1M2</li>');
   });
 
   it('課程有備註時，下拉選項附上備註', () => {
     const html = renderToStaticMarkup(<ApplyForm courses={notedCourses} maxCoursesA={5} locale="zh" />);
-    expect(html).toContain('11510EECS200101　X-Class 線代（李教授）　M1M2　※限大學部</option>');
+    expect(html).toContain('11510EECS200101　X-Class 線代（李教授）　M1M2　※限大學部</li>');
   });
 
   it('科號含空格時，option 顯示以不換行空白取代（避免瀏覽器壓縮），value 維持原始科號', () => {
     const html = renderToStaticMarkup(<ApplyForm courses={spacedCourses} maxCoursesA={5} locale="zh" />);
-    expect(html).toContain('value="11510CS  110400"');
+    expect(html).toContain('data-value="11510CS  110400"');
     expect(html).toContain('11510CS  110400　關鍵科技探索（磨課師）　Mn');
   });
 
@@ -56,7 +58,7 @@ describe('ApplyForm（英文）', () => {
 
   it('X-Class 課程顯示英文課名；無英文課名時退回中文課名', () => {
     expect(renderToStaticMarkup(<ApplyForm courses={courses} maxCoursesA={5} locale="en" />))
-      .toContain('11510EECS200101　Linear Algebra（李教授）　M1M2</option>');
+      .toContain('11510EECS200101　Linear Algebra（李教授）　M1M2</li>');
     expect(renderToStaticMarkup(<ApplyForm courses={spacedCourses} maxCoursesA={5} locale="en" />))
       .toContain('關鍵科技探索（磨課師）');
   });

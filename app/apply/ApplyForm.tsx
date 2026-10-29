@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import Button from '@/components/Button';
+import Combobox from '@/components/Combobox';
 import Field from '@/components/Field';
 import { DEGREES } from '@/lib/degrees';
 import { dict, Locale } from '@/lib/i18n';
@@ -56,14 +57,12 @@ export default function ApplyForm({ courses, maxCoursesA, locale }: { courses: C
       <CourseARows rows={rows} max={maxCoursesA} onChange={setRows} locale={locale} />
 
       <Field id="courseBCode" label={t.courseB} hint={t.courseBHint}>
-        <select id="courseBCode" name="courseBCode" className="input" required value={courseB} onChange={e => setCourseB(e.target.value)}>
-          <option value="" disabled>{t.select}</option>
-          {courses.map(c => (
-            <option key={c.code} value={c.code}>
-              {c.code.replace(/ /g, ' ')}　{locale === 'en' ? c.nameEn || c.name : c.name}（{c.teacher}）　{c.time}{c.note ? `　※${c.note}` : ''}
-            </option>
-          ))}
-        </select>
+        <Combobox id="courseBCode" name="courseBCode" value={courseB} onChange={setCourseB}
+          placeholder={t.courseBSearch} emptyText={t.noMatch}
+          options={courses.map(c => ({
+            value: c.code,
+            label: `${c.code.replace(/ /g, ' ')}　${locale === 'en' ? c.nameEn || c.name : c.name}（${c.teacher}）　${c.time}${c.note ? `　※${c.note}` : ''}`,
+          }))} />
       </Field>
 
       {error && (

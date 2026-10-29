@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import Button from '@/components/Button';
 import Field from '@/components/Field';
 import Badge from '@/components/Badge';
+import Combobox, { filterOptions } from '@/components/Combobox';
 
 describe('Button', () => {
   it('primary 帶主色 class 且最小高度 44px', () => {
@@ -35,5 +36,24 @@ describe('Field', () => {
 describe('Badge', () => {
   it('success 使用 success token', () => {
     expect(renderToStaticMarkup(<Badge tone="success">啟用</Badge>)).toContain('bg-success-bg');
+  });
+});
+
+describe('Combobox', () => {
+  const options = [
+    { value: 'A1', label: 'A1　發展心理學（周育如）　Mn' },
+    { value: 'B2', label: 'B2　Linear Algebra（李教授）　M1M2' },
+  ];
+  it('送出值放在 hidden input，輸入框顯示已選項目', () => {
+    const html = renderToStaticMarkup(<Combobox id="c" name="code" options={options} value="B2" onChange={() => {}} emptyText="無" />);
+    expect(html).toContain('type="hidden" name="code" value="B2"');
+    expect(html).toContain('role="combobox"');
+    expect(html).toContain('value="B2　Linear Algebra（李教授）　M1M2"');
+  });
+  it('filterOptions：多關鍵字皆須命中、不分大小寫，空字串回傳全部', () => {
+    expect(filterOptions(options, '')).toEqual(options);
+    expect(filterOptions(options, '心理 周').map(o => o.value)).toEqual(['A1']);
+    expect(filterOptions(options, 'linear')).toEqual([options[1]]);
+    expect(filterOptions(options, '心理 李')).toEqual([]);
   });
 });
