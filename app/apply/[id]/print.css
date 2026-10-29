@@ -7,7 +7,9 @@ main:has(> .print-wrap) { max-width: none; }
 .print-wrap { max-width: 210mm; margin: 0 auto; }
 
 .sheet {
-  font-family: var(--font-serif);
+  /* 英文字型放前面：中文字型（尤其 Windows 的新細明體）的英文字形寬且字距大，英文版會被擠到第二頁；
+     中文字元在英文字型中沒有字形，會自動退到後面的中文字型 */
+  font-family: "Times New Roman", Times, var(--font-serif);
   background: #fff; color: #000; color-scheme: light;
   width: 100%; min-height: 297mm; padding: 15mm;
   box-shadow: 0 4px 24px rgb(15 23 42 / 0.12);
@@ -47,5 +49,13 @@ main:has(> .print-wrap) { max-width: none; }
   .no-print, body > header, nav { display: none !important; }
   body, main { background: #fff !important; padding: 0 !important; margin: 0 !important; max-width: none !important; }
   .print-wrap { max-width: none; }
-  .sheet { box-shadow: none; border: 0; padding: 0; min-height: auto; }
+  .sheet { box-shadow: none; border: 0; padding: 0; min-height: auto; font-size: 11pt; line-height: 1.45; }
+  .sheet-title h1 { font-size: 16pt; }
+  /* 收緊間距，讓英文版（字數較多）也能維持一頁 */
+  .sheet-head { margin-bottom: 4mm; }
+  .sheet section { margin-bottom: 4mm; }
+  .sheet th, .sheet td { padding: 1.5mm 3mm; }
+  .signatures { margin-top: 6mm; }
+  .signatures span { margin-bottom: 6mm; }
+  .sheet-foot { margin-top: 6mm; }
 }
