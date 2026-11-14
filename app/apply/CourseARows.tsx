@@ -30,9 +30,14 @@ export default function CourseARows({ rows, max, onChange, locale }: Props) {
         <div key={r.key} className="rounded-[var(--radius-card)] border border-border bg-background/60 p-4">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-sm font-medium text-muted-fg">{t.courseANth(i + 1)}</span>
-            <Button type="button" variant="danger" className="min-h-11 px-3 text-xs" onClick={() => remove(i)} disabled={rows.length <= 1} aria-label={t.removeNth(i + 1)}>
-              <TrashIcon className="size-4" /> {t.remove}
-            </Button>
+            {/* 灰色圖示鈕，hover 才轉紅：避免多門課時畫面最搶眼的是刪除；只剩一門時不顯示 */}
+            {rows.length > 1 && (
+              <button type="button" onClick={() => remove(i)} aria-label={t.removeNth(i + 1)} title={t.remove}
+                className="-my-2 -mr-2 inline-flex size-11 cursor-pointer items-center justify-center rounded-[var(--radius-card)] text-muted-fg
+                  transition-colors duration-150 hover:bg-danger-bg hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
+                <TrashIcon className="size-5" />
+              </button>
+            )}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {FIELDS.map(f => {

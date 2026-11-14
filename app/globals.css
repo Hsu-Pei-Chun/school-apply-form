@@ -34,10 +34,14 @@ body {
 /* 欄位多的管理頁（如課程管理）放寬到與導覽列同寬 */
 .container-narrow:has(> .page-wide) { @apply max-w-5xl; }
 
-.input {
-  @apply block w-full min-h-11 rounded-[var(--radius-card)] border border-border bg-surface px-3 text-base
-         transition-[border-color,box-shadow] duration-150
-         focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30;
+/* 放在 components layer：元件上的 utility（pl-9、pr-10、min-h-36、text-sm…）才能覆寫這裡的預設值；
+   寫在 layer 外會比所有 utility 優先，覆寫全部失效（例：搜尋圖示壓到 placeholder） */
+@layer components {
+  .input {
+    @apply block w-full min-h-11 rounded-[var(--radius-card)] border border-border bg-surface px-3 text-base
+           transition-[border-color,box-shadow] duration-150
+           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

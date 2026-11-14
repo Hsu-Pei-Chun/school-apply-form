@@ -1,11 +1,9 @@
-import Card from '@/components/Card';
 import { getDb } from '@/lib/db/client';
 import { listCourses } from '@/lib/courses';
 import { getLocale } from '@/lib/locale';
 import { dict } from '@/lib/i18n';
-import AddCourseForm from './AddCourseForm';
+import CoursesPanels from './CoursesPanels';
 import CoursesTable from './CoursesTable';
-import ImportCoursesForm from './ImportCoursesForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,15 +12,12 @@ export default async function CoursesPage() {
   const t = dict(locale).courses;
   const rows = await listCourses(await getDb());
   return (
-    <div className="page-wide">
-      <h1 className="mb-1 text-2xl font-semibold">{t.title}</h1>
-      <p className="mb-6 text-muted-fg">{t.intro}</p>
-      <Card className="mb-6">
-        <h2 className="mb-3 text-lg font-semibold">{t.importTitle}</h2>
-        <ImportCoursesForm locale={locale} />
-      </Card>
-      <h2 className="mb-3 text-lg font-semibold">{t.addTitle}</h2>
-      <Card className="mb-6"><AddCourseForm locale={locale} /></Card>
+    <div className="page-wide flex flex-col gap-6">
+      <div>
+        <h1 className="mb-1 text-2xl font-semibold">{t.title}</h1>
+        <p className="text-muted-fg">{t.intro}</p>
+      </div>
+      <CoursesPanels locale={locale} />
       <CoursesTable locale={locale} rows={rows} />
     </div>
   );
