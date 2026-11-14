@@ -23,6 +23,24 @@ describe('Nav', () => {
   });
 });
 
+describe('Nav（手機）', () => {
+  it('管理員：手機上顯示選單按鈕（預設收合），連結列只在 md 以上顯示', () => {
+    const html = renderToStaticMarkup(<Nav isAdmin locale="zh" />);
+    const btn = html.match(/<button[^>]*aria-label="開啟選單"[^>]*>/)?.[0];
+    expect(btn).toBeDefined();
+    expect(btn).toContain('aria-expanded="false"');
+    expect(btn).toContain('md:hidden');
+    expect(html).toMatch(/<nav[^>]*class="[^"]*hidden md:flex/);
+  });
+
+  it('學生：沒有選單按鈕；語言切換在手機上縮成短標籤，無障礙名稱不變', () => {
+    const html = renderToStaticMarkup(<Nav isAdmin={false} locale="zh" />);
+    expect(html).not.toContain('開啟選單');
+    expect(html).toMatch(/aria-label="Switch to English"/);
+    expect(html).toMatch(/<span class="md:hidden">EN<\/span>/);
+  });
+});
+
 describe('SiteFooter', () => {
   it('未登入時提供管理員登入入口', () => {
     const html = renderToStaticMarkup(<SiteFooter isAdmin={false} locale="zh" />);

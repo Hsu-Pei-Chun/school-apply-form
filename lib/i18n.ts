@@ -24,7 +24,10 @@ const zh = {
     admin: '管理員',
     logout: '登出',
     switchTo: 'English',
+    switchShort: 'EN',
     switchLabel: 'Switch to English',
+    menuOpen: '開啟選單',
+    menuClose: '關閉選單',
     adminLogin: '管理員登入',
   },
   home: {
@@ -251,7 +254,10 @@ const en: Dict = {
     admin: 'Admin',
     logout: 'Log out',
     switchTo: '中文',
+    switchShort: '中',
     switchLabel: '切換為中文',
+    menuOpen: 'Open menu',
+    menuClose: 'Close menu',
     adminLogin: 'Admin login',
   },
   home: {

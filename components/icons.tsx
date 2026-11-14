@@ -13,7 +13,10 @@ export const ArrowRightIcon = ({ className = 'size-5' }: P) => (
 export const CheckIcon =({ className = 'size-5' }: P) => (
   <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
 );
-export const XIcon = ({ className = 'size-5' }: P) => (
+export const MenuIcon = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+);
+export const XIcon =({ className = 'size-5' }: P) => (
   <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
 );
 export const PlusIcon = ({ className = 'size-5' }: P) => (
