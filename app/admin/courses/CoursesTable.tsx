@@ -91,10 +91,11 @@ export default function CoursesTable({ locale, rows }: { locale: Locale; rows: C
             <input id="course-q" type="search" value={query} onChange={e => setQuery(e.target.value)}
               placeholder={t.searchPlaceholder} className="input pl-9" autoComplete="off" />
           </div>
-          <div role="group" aria-label={t.filterLabel} className="inline-flex self-start overflow-hidden rounded-[var(--radius-card)] border border-border text-sm sm:self-auto">
+          {/* 手機上撐滿整列、三顆等寬，筆數變大（全部（800））也不會超出畫面 */}
+          <div role="group" aria-label={t.filterLabel} className="flex w-full overflow-hidden rounded-[var(--radius-card)] border border-border text-sm sm:inline-flex sm:w-auto">
             {filters.map((f, i) => (
               <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => setFilter(f.key)}
-                className={`min-h-11 cursor-pointer whitespace-nowrap px-3 transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40
+                className={`min-h-11 min-w-0 flex-1 cursor-pointer whitespace-nowrap px-2 transition-colors sm:flex-none sm:px-3 duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40
                   ${i > 0 ? 'border-l border-border' : ''} ${filter === f.key ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-background'}`}>
                 {f.label}
               </button>

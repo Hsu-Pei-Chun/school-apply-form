@@ -7,6 +7,7 @@ import { formatDate } from '@/lib/format';
 import { getLocale } from '@/lib/locale';
 import { dict } from '@/lib/i18n';
 import PrintToolbar from './PrintToolbar';
+import SheetFit from './SheetFit';
 import './print.css';
 
 export const dynamic = 'force-dynamic';
@@ -25,6 +26,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="print-wrap">
       <PrintToolbar locale={locale} barcode={a.barcode} />
+      <SheetFit locale={locale} />
       <article className="sheet">
         <div className="sheet-head">
           <div className="sheet-title">
