@@ -24,7 +24,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="print-wrap">
-      <PrintToolbar locale={locale} />
+      <PrintToolbar locale={locale} barcode={a.barcode} />
       <article className="sheet">
         <div className="sheet-head">
           <div className="sheet-title">

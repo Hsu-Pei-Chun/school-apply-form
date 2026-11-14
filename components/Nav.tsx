@@ -16,7 +16,7 @@ export default function Nav({ isAdmin, locale }: { isAdmin: boolean; locale: Loc
   const links = [
     { href: '/apply', label: t.navApply },
     { href: '/admin/courses', label: t.navCourses },
-    ...(isAdmin ? [{ href: '/admin/settings', label: t.navSettings }] : []),
+    ...(isAdmin ? [{ href: '/admin/settings', label: t.navSettings }, { href: '/admin/syllabus', label: t.navSyllabus }] : []),
   ];
   return (
     <header className="bg-primary text-white">
