@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1E3A5F;
-  --color-primary-hover: #16304F;
-  --color-secondary: #2563EB;
-  --color-background: #F8FAFC;
+  /* 取自清大官網 www.nthu.edu.tw：主色清華紫 #721F6E、banner 深紫 #44033F、
+     外框按鈕淡紫 #7E537B、選單 hover 淡黃 #FFFFD6；其餘為中性灰 */
+  --color-primary: #721F6E;      /* 白字對比 9.8:1 */
+  --color-primary-hover: #44033F;
+  --color-secondary: #7E537B;    /* 連結；白底對比 6.1:1 */
+  --color-highlight: #FFFFD6;    /* 紫底上的 hover 文字 */
+  --color-background: #F6F4F6;
   --color-surface: #FFFFFF;
-  --color-foreground: #0F172A;
-  --color-muted-fg: #475569;
-  --color-border: #CBD5E1;
+  --color-foreground: #222222;
+  --color-muted-fg: #555555;     /* 白底 7.5:1、背景底 6.8:1 */
+  --color-border: #CFC8CF;
   --color-success: #15803D;
   --color-success-bg: #DCFCE7;
   --color-warning: #A16207;

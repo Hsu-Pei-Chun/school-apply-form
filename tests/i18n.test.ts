@@ -19,6 +19,9 @@ describe('dict', () => {
     expect(dict('en').degrees['在職專班']).toBe("In-service Master's");
     expect(dict('en').courses.import.confirm(1, 0)).toBe('Import 1 course');
     expect(dict('zh').courses.import.confirm(3, 2)).toBe('確認匯入 3 筆（略過 2 筆）');
+    expect(dict('zh').home.steps).toHaveLength(4);
+    expect(dict('en').home.steps).toHaveLength(4);
+    expect(dict('zh').apply.missingCourseB).toBe('請選擇 X-Class 課程 B');
   });
 });
 

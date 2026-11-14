@@ -7,16 +7,20 @@ import { logoutAction } from '@/app/login/actions';
 import { setLocaleAction } from '@/app/locale-actions';
 import { dict, Locale } from '@/lib/i18n';
 
-const LINK = 'min-h-11 inline-flex items-center rounded-[var(--radius-card)] px-3 py-2 text-sm transition-colors duration-150 hover:bg-white/10';
+const LINK = 'min-h-11 inline-flex items-center rounded-[var(--radius-card)] px-3 py-2 text-sm transition-colors duration-150 hover:bg-white/10 hover:text-highlight';
 
 export default function Nav({ isAdmin, locale }: { isAdmin: boolean; locale: Locale }) {
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
   const t = dict(locale).site;
+  // 管理頁只給已登入的管理員看；學生的管理員入口在頁尾（SiteFooter）
   const links = [
     { href: '/apply', label: t.navApply },
-    { href: '/admin/courses', label: t.navCourses },
-    ...(isAdmin ? [{ href: '/admin/settings', label: t.navSettings }, { href: '/admin/syllabus', label: t.navSyllabus }] : []),
+    ...(isAdmin ? [
+      { href: '/admin/courses', label: t.navCourses },
+      { href: '/admin/settings', label: t.navSettings },
+      { href: '/admin/syllabus', label: t.navSyllabus },
+    ] : []),
   ];
   return (
     <header className="bg-primary text-white">

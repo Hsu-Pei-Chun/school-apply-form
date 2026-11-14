@@ -27,24 +27,37 @@ export default function PrintToolbar({ locale = 'zh', barcode = '' }: { locale?:
     }
   }
 
+  // 學生最常漏掉「簽章、送交」，所以工具列同時是「下一步」說明卡
   return (
-    <div className="no-print sticky top-0 z-10 mb-4 bg-background py-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Link href="/apply" className="inline-flex min-h-11 items-center gap-1 text-sm text-secondary hover:underline">
-          <ArrowLeftIcon className="size-4" /> {t.back}
-        </Link>
-        <div className="flex flex-wrap gap-2">
+    <div className="no-print mb-6 flex flex-col gap-2">
+      <Link href="/apply" className="inline-flex min-h-11 items-center gap-1 self-start text-sm text-secondary hover:underline">
+        <ArrowLeftIcon className="size-4" /> {t.back}
+      </Link>
+      <section aria-labelledby="next-title" className="rounded-[var(--radius-card)] border border-border bg-surface p-5 sm:p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="next-title" className="text-lg font-semibold text-primary">{t.nextTitle}</h2>
+          {barcode && <p className="text-sm text-muted-fg">{t.barcode}　<span className="font-mono whitespace-pre text-foreground">{barcode}</span></p>}
+        </div>
+        <ol className="mt-3 flex flex-col gap-2">
+          {t.nextSteps.map((s, i) => (
+            <li key={s} className="flex items-start gap-3">
+              <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">{i + 1}</span>
+              <span className="leading-6">{s}</span>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-5 grid gap-2 sm:flex sm:flex-wrap">
+          <Button variant="primary" onClick={() => window.print()}><PrinterIcon /> {t.print}</Button>
           <Button variant="secondary" onClick={onPdf} loading={busy}>
             {!busy && <DownloadIcon />} {busy ? t.pdfBusy : t.pdf}
           </Button>
-          <Button variant="primary" onClick={() => window.print()}><PrinterIcon /> {t.print}</Button>
         </div>
-      </div>
-      {error ? (
-        <p role="alert" className="mt-2 text-sm text-danger">{error}</p>
-      ) : (
-        <p className="mt-2 text-sm text-muted-fg">{t.pdfHint}</p>
-      )}
+        {error ? (
+          <p role="alert" className="mt-3 rounded-[var(--radius-card)] bg-danger-bg px-3 py-2 text-sm text-danger">{error}</p>
+        ) : (
+          <p className="mt-3 text-sm text-muted-fg">{t.pdfHint}</p>
+        )}
+      </section>
     </div>
   );
 }

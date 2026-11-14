@@ -7,7 +7,10 @@ export const PrinterIcon = ({ className = 'size-5' }: P) => (
 export const ArrowLeftIcon = ({ className = 'size-5' }: P) => (
   <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
 );
-export const CheckIcon = ({ className = 'size-5' }: P) => (
+export const ArrowRightIcon = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+);
+export const CheckIcon =({ className = 'size-5' }: P) => (
   <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
 );
 export const XIcon = ({ className = 'size-5' }: P) => (
@@ -28,7 +31,10 @@ export const ChevronDownIcon = ({ className = 'size-5' }: P) => (
 export const DownloadIcon = ({ className = 'size-5' }: P) => (
   <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
 );
-export const SearchIcon = ({ className = 'size-5' }: P) => (
+export const ExternalLinkIcon = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+);
+export const SearchIcon =({ className = 'size-5' }: P) => (
   <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
 );
 export const RefreshIcon = ({ className = 'size-5' }: P) => (

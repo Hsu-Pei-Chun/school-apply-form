@@ -41,6 +41,13 @@ describe('ApplyForm', () => {
     expect(html).toContain('11510CS  110400　關鍵科技探索（磨課師）　Mn');
   });
 
+  it('送出鈕不預先停用，讓瀏覽器驗證能指出缺漏的欄位', () => {
+    const html = renderToStaticMarkup(<ApplyForm courses={courses} maxCoursesA={5} locale="zh" />);
+    const submit = html.match(/<button type="submit"[^>]*>/)?.[0];
+    expect(submit).toBeDefined();
+    expect(submit).not.toContain('disabled=""');
+  });
+
   it('hint 需提示含上課時間', () => {
     const html = renderToStaticMarkup(<ApplyForm courses={courses} maxCoursesA={5} locale="zh" />);
     expect(html).toContain('欲申請的 X-Class 課程（含上課時間），需事先與授課教師確認');
