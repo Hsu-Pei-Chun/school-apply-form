@@ -18,12 +18,18 @@ export default function ApplyForm({ courses, maxCoursesA, locale }: { courses: C
   const [rows, setRows] = useState<CourseARow[]>([{ key: 1, code: '', name: '', time: '', teacher: '' }]);
   const [courseB, setCourseB] = useState('');
   const [error, setError] = useState<{ message: string; existingId?: string } | null>(null);
+  const [courseBError, setCourseBError] = useState('');
   const [pending, startTransition] = useTransition();
 
-  const rowsComplete = rows.every(r => r.code.trim() && r.name.trim() && r.time.trim() && r.teacher.trim());
-
+  // 送出鈕不預先停用：一般欄位交給瀏覽器的 required 驗證（會捲到並標出第一個缺漏欄位）；
+  // 課程 B 的值放在 hidden input，瀏覽器驗不到，這裡自己擋並把焦點移過去
   function onSubmit(formData: FormData) {
     setError(null);
+    if (!courseB) {
+      setCourseBError(t.missingCourseB);
+      document.getElementById('courseBCode')?.focus();
+      return;
+    }
     startTransition(async () => {
       const r = await submitApplication(formData);
       if (r?.error) setError({ message: r.error, existingId: r.existingId });
@@ -56,8 +62,8 @@ export default function ApplyForm({ courses, maxCoursesA, locale }: { courses: C
 
       <CourseARows rows={rows} max={maxCoursesA} onChange={setRows} locale={locale} />
 
-      <Field id="courseBCode" label={t.courseB} hint={t.courseBHint}>
-        <Combobox id="courseBCode" name="courseBCode" value={courseB} onChange={setCourseB}
+      <Field id="courseBCode" label={t.courseB} hint={t.courseBHint} error={courseBError}>
+        <Combobox id="courseBCode" name="courseBCode" value={courseB} onChange={v => { setCourseB(v); setCourseBError(''); }}
           placeholder={t.courseBSearch} emptyText={t.noMatch}
           options={courses.map(c => ({
             value: c.code,
@@ -73,7 +79,7 @@ export default function ApplyForm({ courses, maxCoursesA, locale }: { courses: C
           )}
         </p>
       )}
-      <Button type="submit" variant="primary" loading={pending} disabled={!rowsComplete || !courseB}>{t.submit}</Button>
+      <Button type="submit" variant="primary" loading={pending}>{t.submit}</Button>
     </form>
   );
 }

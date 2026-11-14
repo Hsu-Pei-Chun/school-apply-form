@@ -7,7 +7,10 @@ export const PrinterIcon = ({ className = 'size-5' }: P) => (
 export const ArrowLeftIcon = ({ className = 'size-5' }: P) => (
   <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
 );
-export const CheckIcon = ({ className = 'size-5' }: P) => (
+export const ArrowRightIcon = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+);
+export const CheckIcon =({ className = 'size-5' }: P) => (
   <svg {...base} className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
 );
 export const XIcon = ({ className = 'size-5' }: P) => (
