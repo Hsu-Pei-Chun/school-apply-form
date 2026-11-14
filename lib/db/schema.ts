@@ -65,3 +65,24 @@ export const formSettings = sqliteTable('form_settings', {
   key: text('key').primaryKey(),
   value: text('value').notNull(),
 });
+
+// 課綱 PDF 文字索引：由 /admin/syllabus 讀取校方課綱總表網址，逐一下載 PDF 並擷取文字存起來，之後搜尋關鍵字不必再下載。
+export const syllabi = sqliteTable('syllabi', {
+  code: text('code').primaryKey(),
+  name: text('name').notNull().default(''),
+  nameEn: text('name_en').notNull().default(''),
+  teacher: text('teacher').notNull().default(''),
+  time: text('time').notNull().default(''),
+  pdfUrl: text('pdf_url').notNull(),
+  // 用來判斷 PDF 是否有更新（伺服器回傳的 ETag／Last-Modified），沒變就不重新下載
+  etag: text('etag').notNull().default(''),
+  lastModified: text('last_modified').notNull().default(''),
+  pages: integer('pages').notNull().default(0),
+  text: text('text').notNull().default(''),
+  // 去掉所有空白並轉小寫的文字，搜尋用（PDF 擷取的中文常在詞中間斷行或插空白）
+  compact: text('compact').notNull().default(''),
+  error: text('error').notNull().default(''),
+  indexedAt: text('indexed_at').notNull(),
+});
+
+export type Syllabus = typeof syllabi.$inferSelect;

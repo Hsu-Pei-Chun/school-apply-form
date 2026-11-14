@@ -1,4 +1,5 @@
 import { Db } from './db/client';
+import { inArray } from 'drizzle-orm';
 import { formSettings } from './db/schema';
 import type { Locale } from './i18n';
 import { AppError } from './messages';
@@ -70,5 +71,6 @@ export async function saveFormSettings(db: Db, input: FormSettingsInput): Promis
 }
 
 export async function resetFormSettings(db: Db): Promise<void> {
-  await db.delete(formSettings).run();
+  // 只刪申請表文字；同一張表也存了課綱搜尋的設定（lib/syllabus/store.ts），不能一起清掉
+  await db.delete(formSettings).where(inArray(formSettings.key, [...KEYS])).run();
 }

@@ -19,6 +19,7 @@ export default function Nav({ isAdmin, locale }: { isAdmin: boolean; locale: Loc
     ...(isAdmin ? [
       { href: '/admin/courses', label: t.navCourses },
       { href: '/admin/settings', label: t.navSettings },
+      { href: '/admin/syllabus', label: t.navSyllabus },
     ] : []),
   ];
   return (
