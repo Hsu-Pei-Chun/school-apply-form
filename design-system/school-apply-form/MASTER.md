@@ -1,227 +1,96 @@
-# Design System Master File
+# 設計規範（School Apply Form）
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
+> 本文件描述**目前網站實際使用**的設計。程式中的唯一來源是 `app/globals.css` 的 `@theme` 與 `components/`；
+> 兩者不一致時以程式為準，並請同步更新本文件。新增頁面前請先讀完「頁面模式」與「禁止事項」。
 
----
-
-**Project:** School Apply Form
-**Generated:** 2026-09-13 23:31:48
-**Category:** Grant / Funding Portal
-**Design Dials:** Variance 3/10 (Centered / Minimal) | Motion 2/10 (Subtle) | Density 6/10 (Standard)
+**產品**：國立清華大學 X-Class 課程申請表系統。學生端填表、產生含條碼申請表並列印；管理端（課務組）管理課程、申請表文字與課綱搜尋。
+**基調**：校務行政工具。清楚、穩重、好填，不追求行銷感；手機也要能完整操作。
 
 ---
 
-## Global Rules
+## 色彩
 
-### Color Palette
+取自清大官網 www.nthu.edu.tw 的 CSS。Tailwind class 以 token 名稱使用，例如 `bg-primary`、`text-muted-fg`。**不要在元件裡寫死色碼。**
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#1E3A5F` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#2563EB` | `--color-secondary` |
-| Accent/CTA | `#A16207` | `--color-accent` |
-| Background | `#F8FAFC` | `--color-background` |
-| Foreground | `#0F172A` | `--color-foreground` |
-| Muted | `#E9EEF5` | `--color-muted` |
-| Border | `#CBD5E1` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| Ring | `#1E3A5F` | `--color-ring` |
+| Token | 色碼 | 用途 | 對比 |
+|---|---|---|---|
+| `primary` | `#721F6E` 清華紫 | 導覽列、主按鈕、標題強調、步驟編號、開關開啟 | 白字 9.8:1 |
+| `primary-hover` | `#44033F` | 主按鈕 hover（官網 banner 深紫） | |
+| `secondary` | `#7E537B` | 文字連結（回申請頁、開啟 PDF、再顯示 N 段） | 白底 6.1:1 |
+| `highlight` | `#FFFFD6` | 紫色導覽列上的 hover 文字 | |
+| `background` | `#F6F4F6` | 頁面底色 | |
+| `surface` | `#FFFFFF` | 卡片、輸入框 | |
+| `foreground` | `#222222` | 內文 | |
+| `muted-fg` | `#555555` | 次要文字、提示、圖示鈕 | 白底 7.5:1 |
+| `border` | `#CFC8CF` | 卡片與輸入框外框（裝飾用，不可單獨表達狀態） | |
+| `success` / `success-bg` | `#15803D` / `#DCFCE7` | 成功訊息、勾選圖示 | |
+| `warning` / `warning-bg` | `#A16207` / `#FEF9C3` | 匯入「略過」、搜尋命中 `<mark>` 底色 | |
+| `danger` / `danger-bg` | `#DC2626` / `#FEE2E2` | 錯誤訊息、**不可復原**的動作（刪除） | 白底 4.8:1 |
 
-**Color Notes:** Institutional navy + research accent + serif headings
+規則：
+- 紅色只用在錯誤與不可復原的動作。可還原的動作（停用課程）用中性樣式或開關。
+- 需要區分的狀態不可只靠色相，要同時有明暗或填滿差異（例：開關開＝紫色實心、關＝灰框空心）。
+- 文字對比至少 4.5:1。
+- 列印申請表（`.sheet`）固定黑白，不套用主題色。
 
-### Typography
+## 字型
 
-- **Heading Font:** EB Garamond
-- **Body Font:** Crimson Text
-- **Mood:** academic, old-school, university, research, serious, traditional
-- **Google Fonts:** [EB Garamond + Crimson Text](https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=EB+Garamond:wght@400;500;600;700;800&display=swap)
+- 介面：`--font-sans` = Noto Sans TC → PingFang TC → Microsoft JhengHei → system-ui。
+- 申請表：`--font-serif`，英文字型在前（Times New Roman），避免英文版擠到第二頁。
+- 科號、上課時間、條碼號碼用 `font-mono`；科號含空格補位，要加 `whitespace-pre`。
+- 字級：頁面標題 `text-2xl`（首頁主標 `text-3xl`～`text-4xl`）、區段標題 `text-lg`～`text-xl font-semibold`、內文 16px、提示 `text-sm`。
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=EB+Garamond:wght@400;500;600;700;800&display=swap');
-```
+## 形狀與間距
 
-### Spacing Variables
+- 圓角統一 `--radius-card`（8px）；膠囊標籤與步驟編號用 `rounded-full`。
+- 卡片：`border border-border bg-surface`，padding `p-5`～`p-6`，**不加陰影**（只有螢幕上的申請表紙張有陰影）。
+- 區塊間距 `gap-6`；表單欄位間距 `gap-3`～`gap-4`。
+- 版面寬度：一般頁 `max-w-[720px]`（`.container-narrow`）；欄位多的頁面最外層加 `.page-wide` 放寬到 `max-w-5xl`。
 
-*Density: 6/10 — Standard*
+## 元件（`components/`）
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
+| 元件 | 說明 |
+|---|---|
+| `Button` | `primary`／`secondary`／`danger`；最小高度 44px（`min-h-11`）；`loading` 顯示轉圈並停用 |
+| `Card` | 白底外框卡片 |
+| `Field` | 標籤 + 輸入 + 提示／錯誤（錯誤帶 `role="alert"`） |
+| `Badge` | 狀態膠囊：`success`／`neutral`／`warning`／`danger` |
+| `Combobox` | 可搜尋下拉（選項多時用；選項少於約 6 個用原生 `select`） |
+| `SiteFooter` | 未登入時的「管理員登入」入口 |
+| `icons.tsx` | Heroicons outline，`stroke-width 1.5`，預設 `size-5` |
+| `.input` | 所有輸入框、select、textarea 的共用 class |
 
-### Shadow Depths
+圖示鈕（只有圖示、沒有文字）：`size-11`、`text-muted-fg`、hover 才顯示語意色，一定要有 `aria-label`。
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+## 頁面模式
 
----
+- **流程導向**：學生最容易漏的是「列印 → 簽章 → 送交」。首頁與列印頁都用**編號步驟**（紫色圓形數字 + 標題 + 一行說明）講清楚。
+- **主要任務放最上面**：課綱搜尋頁先放搜尋框；課程管理頁先放列表。不常用的設定收起來（`<details>` 或按鈕展開面板），需要時才自動展開（例：尚未建立課綱索引、索引更新中）。
+- **長清單**：每筆資料用卡片或表格列；次要內容（第 2 段以後的搜尋片段）收進「再顯示 N 段」。
+- **列表工具列**：搜尋框 + 狀態篩選（分段按鈕，`aria-pressed`，附筆數）+ 批次動作。
+- **表單送出**：送出鈕不預先停用，讓瀏覽器 `required` 驗證指出缺漏欄位；瀏覽器驗不到的（hidden input）自己檢查並移動焦點。
+  用 `onSubmit` 而不是 `<form action>`，否則 React 19 會在送出失敗時清空未受控欄位。
+- **管理入口**：導覽列只對已登入管理員顯示管理頁；學生端只在頁尾放「管理員登入」。
 
-## Component Specs
+## 無障礙與互動
 
-### Buttons
+- 觸控區至少 44×44px。
+- 可見的 focus ring：`focus-visible:ring-2 focus-visible:ring-primary/40`。
+- 互動元素一律 `cursor-pointer`；hover／狀態轉換 150ms（`transition-colors duration-150`）。
+- 尊重 `prefers-reduced-motion`（`globals.css` 已全域處理）。
+- 手機 375px 不可出現水平捲動；寬表格放在 `overflow-x-auto` 容器裡。
+- 中英雙語：所有介面文字放 `lib/i18n.ts`，不要寫死在元件裡。
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #A16207;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+## 列印
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
+- 申請表在 `app/apply/[id]/print.css`：A4、黑白、一頁。
+- 螢幕上才需要的東西（工具列、說明卡、頁尾）加 `.no-print`。
+- `.sheet.pdf-mode` 規則供「下載 PDF」使用，不可放進 `@media` 區塊（有測試檢查）。
 
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #1E3A5F;
-  border: 2px solid #1E3A5F;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
+## 禁止事項
 
-### Cards
-
-```css
-.card {
-  background: #F8FAFC;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
-
-### Inputs
-
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
-
-.input:focus {
-  border-color: #1E3A5F;
-  outline: none;
-  box-shadow: 0 0 0 3px #1E3A5F20;
-}
-```
-
-### Modals
-
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
-
----
-
-## Style Guidelines
-
-**Style:** Exaggerated Minimalism
-
-**Keywords:** Bold minimalism, oversized typography, high contrast, negative space, loud minimal, statement design
-
-**Best For:** Fashion, architecture, portfolios, agency landing pages, luxury brands, editorial
-
-**Key Effects:** font-size: clamp(3rem 10vw 12rem), font-weight: 900, letter-spacing: -0.05em, massive whitespace
-
-### Page Pattern
-
-**Pattern Name:** Lead Magnet + Form
-
-- **Conversion Strategy:** Form fields ≤ 3 for best conversion. Offer valuable lead magnet preview. Show form submission progress.
-- **CTA Placement:** Form CTA: Submit button
-- **Section Order:** 1. Hero (benefit headline), 2. Lead magnet preview (ebook cover, checklist, etc), 3. Form (minimal fields), 4. CTA submit
-
----
-
-## Motion
-
-**Scroll Reveal** (Subtle) — Trigger: scroll (viewport enter) | Duration: 300-400ms | Easing: `power1.out`
-
-```js
-gsap.from(el, { opacity: 0, y: 12, duration: 0.35, ease: 'power1.out', scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' } });
-```
-
-**Framework notes:** Requires the ScrollTrigger plugin registered once via gsap.registerPlugin(ScrollTrigger)
-
-- ✅ Keep the y offset small (8-16px) so it reads as a fade, not a slide
-- ❌ Don't reveal below-the-fold content needed for SEO/crawlers as invisible-by-default without a no-JS fallback
-- ⚡ toggleActions 'play none none reverse' avoids re-triggering on every scroll direction change
-
----
-
-## Anti-Patterns (Do NOT Use)
-
-- ❌ Muted colors
-- ❌ Low energy
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
-
----
-
-## Pre-Delivery Checklist
-
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+- 寫死色碼、另外引入色票或字型。
+- 用 emoji 當圖示。
+- 紅色用在可還原的動作上。
+- 漸層背景、左側色條卡片、大面積陰影等裝飾。
+- 對學生顯示管理頁連結。
