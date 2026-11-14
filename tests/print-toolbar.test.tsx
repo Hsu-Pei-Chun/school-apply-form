@@ -13,6 +13,14 @@ describe('PrintToolbar', () => {
     expect(html).toContain('href="/apply"');
   });
 
+  it('提示接下來的三個步驟：列印、簽章、送交課務組', () => {
+    const html = renderToStaticMarkup(<PrintToolbar barcode="112000001-X-B" />);
+    expect(html).toContain('接下來請完成');
+    expect(html.match(/<li/g)).toHaveLength(3);
+    expect(html).toContain('送交課務組');
+    expect(html).toContain('112000001-X-B');
+  });
+
   it('回申請頁連結最小可點擊高度需達 44px（min-h-11）', () => {
     const html = renderToStaticMarkup(<PrintToolbar />);
     const linkMatch = html.match(/<a[^>]*href="\/apply"[^>]*>/);

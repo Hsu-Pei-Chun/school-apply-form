@@ -87,6 +87,12 @@ const zh = {
     pdfBusy: '產生 PDF 中…',
     pdfError: 'PDF 產生失敗，請再試一次，或改用「列印申請表」。',
     pdfHint: '用手機也可以先下載 PDF 存檔，之後再找印表機列印。',
+    nextTitle: '接下來請完成',
+    nextSteps: [
+      '列印申請表，或下載 PDF 之後再列印',
+      '請 X-Class 授課教師簽章，並由本人簽名',
+      '將簽好的紙本申請表送交課務組',
+    ],
     pdfFilename: '申請表',
     title: '國立清華大學　X-Class 課程修課申請表',
     subtitle: 'NTHU X-Class Application Form　　115 學年度上學期',
@@ -212,6 +218,8 @@ const zh = {
     hits: (n: number) => `${n} 處`,
     openPdf: '開啟 PDF',
     showingFirst: (n: number) => `只顯示前 ${n} 筆，請改用更精確的關鍵字。`,
+    moreSnippets: (n: number) => `再顯示 ${n} 段`,
+    sourceSummary: '課綱來源與更新',
   },
 };
 
@@ -294,6 +302,12 @@ const en: Dict = {
     pdfBusy: 'Creating PDF…',
     pdfError: 'Could not create the PDF. Please try again, or use “Print Form”.',
     pdfHint: 'On a phone, download the PDF first and print it later at any printer.',
+    nextTitle: 'Next steps',
+    nextSteps: [
+      'Print the form, or download the PDF and print it later',
+      'Have the X-Class instructor sign it, and sign it yourself',
+      'Submit the signed paper form to the Curriculum Division',
+    ],
     pdfFilename: 'application',
     title: 'National Tsing Hua University　X-Class Course Application Form',
     subtitle: 'NTHU X-Class Application Form　　Fall Semester, Academic Year 2026–27',
@@ -419,6 +433,8 @@ const en: Dict = {
     hits: (n: number) => `${n} hit${n === 1 ? '' : 's'}`,
     openPdf: 'Open PDF',
     showingFirst: (n: number) => `Showing the first ${n} only; try a more specific keyword.`,
+    moreSnippets: (n: number) => `Show ${n} more`,
+    sourceSummary: 'Syllabus source & updates',
   },
 };
 
