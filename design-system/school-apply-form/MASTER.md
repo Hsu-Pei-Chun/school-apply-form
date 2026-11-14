@@ -55,7 +55,8 @@
 | `Card` | 白底外框卡片 |
 | `Field` | 標籤 + 輸入 + 提示／錯誤（錯誤帶 `role="alert"`） |
 | `Badge` | 狀態膠囊：`success`／`neutral`／`warning`／`danger` |
-| `Combobox` | 可搜尋下拉（選項多時用；選項少於約 6 個用原生 `select`） |
+| `app/apply/FormSection` | 申請表的編號區段卡（完成時編號變綠色勾勾） |
+| `app/apply/CourseBPicker` | 搜尋框＋可點選的課程卡片（原生 radio，值走 hidden input）；選項少於約 6 個用原生 `select` |
 | `SiteFooter` | 未登入時的「管理員登入」入口 |
 | `icons.tsx` | Heroicons outline，`stroke-width 1.5`，預設 `size-5` |
 | `.input` | 所有輸入框、select、textarea 的共用 class |
