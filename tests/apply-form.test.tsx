@@ -48,6 +48,11 @@ describe('ApplyForm', () => {
     expect(submit).not.toContain('disabled=""');
   });
 
+  it('不用 <form action>：React 19 會在 action 結束後重設未受控欄位，送出失敗時學號、姓名會被清空', () => {
+    const html = renderToStaticMarkup(<ApplyForm courses={courses} maxCoursesA={5} locale="zh" />);
+    expect(html).not.toContain('React form unexpectedly submitted');
+  });
+
   it('hint 需提示含上課時間', () => {
     const html = renderToStaticMarkup(<ApplyForm courses={courses} maxCoursesA={5} locale="zh" />);
     expect(html).toContain('欲申請的 X-Class 課程（含上課時間），需事先與授課教師確認');
