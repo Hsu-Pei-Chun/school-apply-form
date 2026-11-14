@@ -99,6 +99,7 @@ const zh = {
     pdfBusy: '產生 PDF 中…',
     pdfError: 'PDF 產生失敗，請再試一次，或改用「列印申請表」。',
     pdfHint: '用手機也可以先下載 PDF 存檔，之後再找印表機列印。',
+    overflowWarning: '這張申請表內容較多，已自動縮小字級，列印時仍會超過一頁。請確認每一頁都有印出並一起送交。',
     nextTitle: '接下來請完成',
     nextSteps: [
       '列印申請表，或下載 PDF 之後再列印',
@@ -213,6 +214,8 @@ const zh = {
     save: '儲存',
     saved: '已儲存',
     reset: '還原為預設文字',
+    lengthHint: (n: number, limit: number) => `同意事項＋送交說明共 ${n} 字（建議 ${limit} 字以內，申請表才能維持一頁）。`,
+    lengthOver: '超過時申請表會自動縮小字級，再長就會印成兩頁。',
   },
   syllabus: {
     title: '課綱搜尋',
@@ -338,6 +341,7 @@ const en: Dict = {
     pdfBusy: 'Creating PDF…',
     pdfError: 'Could not create the PDF. Please try again, or use “Print Form”.',
     pdfHint: 'On a phone, download the PDF first and print it later at any printer.',
+    overflowWarning: 'This form has a lot of content. The text has been made smaller, but it will still print on more than one page. Please print and submit every page.',
     nextTitle: 'Next steps',
     nextSteps: [
       'Print the form, or download the PDF and print it later',
@@ -452,6 +456,8 @@ const en: Dict = {
     save: 'Save',
     saved: 'Saved',
     reset: 'Restore defaults',
+    lengthHint: (n: number, limit: number) => `Terms + submission note: ${n} characters (keep within ${limit} so the form fits on one page).`,
+    lengthOver: 'Beyond that the form switches to smaller text, and very long text will print on two pages.',
   },
   syllabus: {
     title: 'Syllabus Search',

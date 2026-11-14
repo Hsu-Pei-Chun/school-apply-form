@@ -21,13 +21,20 @@ main:has(> .print-wrap) { max-width: none; }
 .sheet-title h1 { font-size: 18pt; font-weight: 700; letter-spacing: 0.05em; }
 .sheet-title p { font-size: 10pt; color: #333; }
 .barcode { flex: 0 0 auto; text-align: center; padding: 5mm; border: 1px solid #000; }
-.barcode svg { width: 70mm; height: auto; display: block; }
+.barcode svg { width: 70mm; max-width: 100%; height: auto; display: block; }
 .barcode .human { font-family: ui-monospace, monospace; font-size: 9pt; margin-top: 1mm; letter-spacing: 0.08em; }
 .sheet section { margin-bottom: 5mm; }
 .sheet h2 { font-size: 12pt; font-weight: 700; margin-bottom: 2mm; }
-.sheet table { width: 100%; border-collapse: collapse; }
-.sheet th, .sheet td { border: 1px solid #000; padding: 2mm 3mm; text-align: left; vertical-align: middle; }
-.sheet .code, .barcode .human { white-space: pre; }
+/* 固定欄寬＋任意處斷行：課程欄位若是一長串沒有空格的文字（最多 100 字），表格才不會被撐出紙張 */
+.sheet table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.sheet th, .sheet td { border: 1px solid #000; padding: 2mm 3mm; text-align: left; vertical-align: middle; overflow-wrap: anywhere; }
+/* 科號含補位空格要原樣保留（pre），但仍允許在必要時換行（pre-wrap） */
+.sheet .code, .barcode .human { white-space: pre-wrap; }
+.courses-a th:nth-child(2) { width: 24%; }
+.courses-a th:nth-child(4) { width: 16%; }
+.courses-a th:nth-child(5) { width: 20%; }
+/* 內容多到要分頁時，不要把表格列、簽名區、抬頭從中間切開 */
+.sheet tr, .sheet-head, .signatures { break-inside: avoid; }
 .sheet th { width: 22%; background: #f1f5f9; font-weight: 600; }
 .courses-a th { width: auto; }
 .courses-a th:first-child, .courses-a td:first-child { width: 8mm; text-align: center; }
@@ -71,3 +78,17 @@ main:has(> .print-wrap) { max-width: none; }
   .signatures span { margin-bottom: 6mm; }
   .sheet-foot { margin-top: 6mm; }
 }
+
+/* 內容很長時（page.tsx 依字數加上 .dense）縮小字級與間距，盡量維持一頁。
+   放在最後：同權重下要蓋過上面的列印區塊與 .pdf-mode 規則 */
+.sheet.dense { font-size: 9.5pt; line-height: 1.35; }
+.sheet.dense .sheet-title h1 { font-size: 14pt; }
+.sheet.dense th, .sheet.dense td { padding: 1mm 2mm; }
+.sheet.dense section { margin-bottom: 3mm; }
+.sheet.dense .sheet-head { margin-bottom: 3mm; }
+.sheet.dense .terms { font-size: 9pt; }
+.sheet.dense .terms li { margin-bottom: 0.5mm; }
+.sheet.dense .signatures { margin-top: 4mm; }
+.sheet.dense .signatures span { margin-bottom: 5mm; }
+.sheet.dense .sheet-foot { margin-top: 4mm; }
+.sheet.dense .note { font-size: 9pt; }

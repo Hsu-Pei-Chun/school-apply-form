@@ -42,7 +42,7 @@ export default function CourseBPicker({ courses, value, onChange, error, labelle
       <p className="text-sm text-muted-fg">{t.courseBCount(courses.length)}</p>
       {error && <p id="courseB-error" role="alert" className="text-sm text-danger">{error}</p>}
 
-      <div role="radiogroup" aria-labelledby={labelledBy} className="-m-1 flex max-h-[28rem] flex-col gap-2 overflow-y-auto p-1">
+      <div role="radiogroup" aria-labelledby={labelledBy} className="flex max-h-[28rem] flex-col gap-2 overflow-y-auto p-1">
         {shown.map(c => {
           const checked = c.code === value;
           return (

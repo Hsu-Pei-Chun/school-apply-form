@@ -64,6 +64,20 @@ describe('下載 PDF', () => {
     expect(tall.x).toBeCloseTo(55);
   });
 
+  it('表格固定欄寬並允許任意處斷行：長串無空格的課程欄位不可把表格撐出紙張', () => {
+    const css = readFileSync(path.join(__dirname, '../app/apply/[id]/print.css'), 'utf-8');
+    expect(css).toMatch(/\.sheet table\s*{[^}]*table-layout:\s*fixed/);
+    expect(css).toMatch(/\.sheet th, \.sheet td\s*{[^}]*overflow-wrap:\s*anywhere/);
+    expect(css).toMatch(/\.sheet \.code, \.barcode \.human\s*{[^}]*white-space:\s*pre-wrap/);
+  });
+
+  it('緊湊版面 .dense 規則在 @media 外且排在 .pdf-mode 之後（同權重才蓋得過）', () => {
+    const css = readFileSync(path.join(__dirname, '../app/apply/[id]/print.css'), 'utf-8');
+    const outside = css.replace(/@media[^{]*{(?:[^{}]*{[^{}]*})*[^{}]*}/g, '');
+    expect(outside).toMatch(/\.sheet\.dense\s*{[^}]*font-size/);
+    expect(css.lastIndexOf('.sheet.dense')).toBeGreaterThan(css.lastIndexOf('.sheet.pdf-mode'));
+  });
+
   it('pdf-mode 規則不可放在 @media 區塊內（手機寬度下也必須套用 A4 版面）', () => {
     const css = readFileSync(path.join(__dirname, '../app/apply/[id]/print.css'), 'utf-8');
     const outside = css.replace(/@media[^{]*{(?:[^{}]*{[^{}]*})*[^{}]*}/g, '');
