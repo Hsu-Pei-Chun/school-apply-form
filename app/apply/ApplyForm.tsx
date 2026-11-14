@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, type FormEvent } from 'react';
 import Button from '@/components/Button';
 import Combobox from '@/components/Combobox';
 import Field from '@/components/Field';
@@ -21,15 +21,19 @@ export default function ApplyForm({ courses, maxCoursesA, locale }: { courses: C
   const [courseBError, setCourseBError] = useState('');
   const [pending, startTransition] = useTransition();
 
-  // 送出鈕不預先停用：一般欄位交給瀏覽器的 required 驗證（會捲到並標出第一個缺漏欄位）；
-  // 課程 B 的值放在 hidden input，瀏覽器驗不到，這裡自己擋並把焦點移過去
-  function onSubmit(formData: FormData) {
+  // 送出鈕不預先停用：一般欄位交給瀏覽器的 required 驗證（會捲到並標出第一個缺漏欄位，通過才會觸發 submit）；
+  // 課程 B 的值放在 hidden input，瀏覽器驗不到，這裡自己擋並把焦點移過去。
+  // 刻意用 onSubmit 而不是 <form action>：React 19 會在 action 結束後重設未受控欄位，
+  // 送出失敗（缺課程 B、重複申請等）時學生已填的學號、姓名會被清空。
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setError(null);
     if (!courseB) {
       setCourseBError(t.missingCourseB);
       document.getElementById('courseBCode')?.focus();
       return;
     }
+    const formData = new FormData(e.currentTarget);
     startTransition(async () => {
       const r = await submitApplication(formData);
       if (r?.error) setError({ message: r.error, existingId: r.existingId });
@@ -37,7 +41,7 @@ export default function ApplyForm({ courses, maxCoursesA, locale }: { courses: C
   }
 
   return (
-    <form action={onSubmit} className="flex flex-col gap-6">
+    <form onSubmit={onSubmit} className="flex flex-col gap-6">
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-1 text-sm font-medium">{t.applicant}</legend>
         <div className="grid gap-3 sm:grid-cols-2">
