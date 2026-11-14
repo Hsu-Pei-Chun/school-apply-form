@@ -45,6 +45,18 @@ main:has(> .print-wrap) { max-width: none; }
   .sheet { padding: 8mm; }
 }
 
+/* 下載 PDF 用（lib/pdf-export.ts）：畫面外的複本固定為 A4 尺寸，版面與下方列印樣式相同；
+   要壓過上面手機寬度的規則，否則在手機上產生的 PDF 會是窄版排列 */
+.sheet.pdf-mode { width: 210mm; min-height: 297mm; padding: 15mm; box-shadow: none; border: 0; font-size: 11pt; line-height: 1.45; }
+.sheet.pdf-mode .sheet-title h1 { font-size: 16pt; }
+.sheet.pdf-mode .sheet-head { flex-direction: row; margin-bottom: 4mm; }
+.sheet.pdf-mode .barcode { align-self: flex-start; max-width: none; }
+.sheet.pdf-mode section { margin-bottom: 4mm; }
+.sheet.pdf-mode th, .sheet.pdf-mode td { padding: 1.5mm 3mm; }
+.sheet.pdf-mode .signatures { margin-top: 6mm; }
+.sheet.pdf-mode .signatures span { margin-bottom: 6mm; }
+.sheet.pdf-mode .sheet-foot { margin-top: 6mm; }
+
 @media print {
   .no-print, body > header, nav { display: none !important; }
   body, main { background: #fff !important; padding: 0 !important; margin: 0 !important; max-width: none !important; }
