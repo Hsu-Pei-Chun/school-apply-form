@@ -77,6 +77,14 @@ describe('關鍵字比對', () => {
     expect(snippets[0][2].text.endsWith('…')).toBe(true);
   });
 
+  it('英數關鍵字只比對完整單字：AI 不會命中 detail、maintain；緊鄰中文仍算命中', () => {
+    const text = 'Course detail: maintain email. 本課介紹 AI 應用、AI倫理與生成式AI，以及 OpenAI 的 API。';
+    expect(findHits(text, 'AI').count).toBe(3);
+    expect(findHits(text, 'ai').count).toBe(3);
+    expect(findHits('Internet of Things (IoT) 與 idiot', 'IoT').count).toBe(1);
+    expect(findHits('5G 通訊與 15G', '5G').count).toBe(1);
+  });
+
   it('正規表示式特殊字元與 LIKE 萬用字元會被跳脫', () => {
     expect(findHits('使用 C++ 與 C#', 'c++').count).toBe(1);
     expect(likePattern('100%_a')).toBe('%100\\%\\_a%');
@@ -119,6 +127,11 @@ describe('課綱資料庫', () => {
     expect(r.results[0].hits.map(h => h.count)).toEqual([2, 1]);
 
     expect((await searchSyllabi(db, '李清福')).results.map(x => x.code)).toEqual(['C']);
+
+    // 資料庫初篩以子字串比對（maintain 含 ai），但只出現在單字中間的不算命中、不列出
+    await upsertSyllabus(db, entry('D'), content('Please maintain the course detail.'));
+    await upsertSyllabus(db, entry('E'), content('本課介紹 AI 應用。'));
+    expect((await searchSyllabi(db, 'AI')).results.map(x => x.code)).toEqual(['E']);
     expect((await searchSyllabi(db, '')).results).toEqual([]);
     expect((await searchSyllabi(db, '%')).results).toEqual([]);
   });

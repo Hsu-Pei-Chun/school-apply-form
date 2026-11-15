@@ -20,8 +20,14 @@ export function parseKeywords(q: string): string[] {
 }
 
 function keywordRegex(keyword: string): RegExp {
-  const chars = [...compactText(keyword)].map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  return new RegExp(chars.join('\\s*'), 'giu');
+  const compact = compactText(keyword);
+  const chars = [...compact].map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const body = chars.join('\\s*');
+  // 純英數關鍵字（AI、ESG、IoT…）只比對完整單字：前後不可緊接英數字，
+  // 否則 AI 會命中 detail、maintain、email，幾乎每份課綱都符合。緊鄰中文（生成式AI、AI倫理）仍算命中。
+  return /^[a-z0-9]+$/.test(compact)
+    ? new RegExp(`(?<![a-z0-9])${body}(?![a-z0-9])`, 'giu')
+    : new RegExp(body, 'giu');
 }
 
 export type Segment = { text: string; hit: boolean };
