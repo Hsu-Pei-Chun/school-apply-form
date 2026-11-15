@@ -130,6 +130,8 @@ export async function searchSyllabi(db: Db, q: string): Promise<{ keywords: stri
     const hits = keywords.map(k => findHits(searchable, k));
     return { ...meta, hits, total: hits.reduce((n, h) => n + h.count, 0) };
   });
-  results.sort((a, b) => b.total - a.total || a.code.localeCompare(b.code));
-  return { keywords, results };
+  // 資料庫初篩是子字串比對（compact LIKE），英數關鍵字要再以完整單字過濾：只出現在單字中間的不列出
+  const matched = results.filter(r => r.total > 0);
+  matched.sort((a, b) => b.total - a.total || a.code.localeCompare(b.code));
+  return { keywords, results: matched };
 }

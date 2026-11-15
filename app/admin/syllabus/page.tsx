@@ -8,6 +8,7 @@ import { formatDateTime } from '@/lib/format';
 import { getLastRun, getSyllabusIndexUrl, getSyllabusStats, searchSyllabi } from '@/lib/syllabus/store';
 import { getIndexStatus } from '@/lib/syllabus/indexer';
 import IndexPanel from './IndexPanel';
+import SourceDetails from './SourceDetails';
 import SyllabusResult from './SyllabusResult';
 
 export const dynamic = 'force-dynamic';
@@ -46,7 +47,7 @@ export default async function SyllabusPage({ searchParams }: { searchParams: Pro
         </form>
       </Card>
 
-      <details open={openSource} className="group rounded-[var(--radius-card)] border border-border bg-surface">
+      <SourceDetails initialOpen={openSource} summary={
         <summary className="flex min-h-11 cursor-pointer list-none flex-wrap [&::-webkit-details-marker]:hidden items-center justify-between gap-x-4 gap-y-1 px-5 py-3">
           <span className="flex items-center gap-2 font-semibold">
             <ChevronDownIcon className="size-4 -rotate-90 transition-transform duration-150 group-open:rotate-0" />
@@ -57,10 +58,11 @@ export default async function SyllabusPage({ searchParams }: { searchParams: Pro
             {lastRun && <> {t.lastRun(formatDateTime(lastRun.finishedAt))}</>}
           </span>
         </summary>
+      }>
         <div className="border-t border-border px-5 py-4">
           <IndexPanel locale={locale} initialUrl={url} initialStatus={status} />
         </div>
-      </details>
+      </SourceDetails>
 
       {search.keywords.length > 0 && (
         <section aria-live="polite" aria-label={t.searchTitle} className="flex flex-col gap-3">
